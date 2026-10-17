@@ -17,6 +17,8 @@ from supabase import Client
 
 from deps import get_settings, get_supabase, log_activity, require_approval
 from routers.search import router as search_router
+from routers.crud import router as crud_router
+from routers.accounting import router as accounting_router
 
 app = FastAPI(
     title="Jupiter Supply — AI Product Search Engine",
@@ -58,6 +60,8 @@ async def crm_preview():
     return HTMLResponse(open(p).read())
 
 app.include_router(search_router)
+app.include_router(crud_router)
+app.include_router(accounting_router)
 
 
 @app.get("/health")
@@ -89,7 +93,16 @@ pre{background:#0a1528;border-radius:10px;padding:12px;font-size:12px;overflow:a
 .hint{font-size:12px;color:#9db2d8;margin-top:14px;text-align:center}
 .hint a{color:#D4A017}
 .status{font-size:12px;margin-top:8px}
-.ok{color:#7CFC98}.wait{color:#D4A017}
+.ok{color:#7CFC98}.wait{color:#D4A017}.err{color:#ff9a9a}
+.res{background:#0a1528;border-radius:10px;padding:12px;margin-top:10px;font-size:13px}
+.supcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px;margin-bottom:8px}
+.supcard a{color:#D4A017;font-weight:700;font-size:14px;text-decoration:none}
+.supcard .dom{color:#9db2d8;font-size:11px;margin:2px 0}
+.supcard .snip{color:#cdd8ee;font-size:12px;line-height:1.4}
+.prodcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px;margin-bottom:8px}
+.prodcard .nm{font-weight:700;font-size:14px}
+.prodcard .meta{color:#9db2d8;font-size:12px;margin-top:2px}
+.idbox{background:rgba(212,160,23,.12);border:1px solid #D4A017;border-radius:10px;padding:10px;margin-bottom:8px;font-size:13px}
 </style></head><body><div class="wrap">
 <div class="badge">PRIVATE PREVIEW — NOT THE WEBSITE</div>
 <h1>🔍 Jupiter AI Search Engine</h1>
@@ -104,35 +117,59 @@ pre{background:#0a1528;border-radius:10px;padding:12px;font-size:12px;overflow:a
 <div class="row"><input type="text" id="sup" placeholder="e.g. hotel soap dispenser"><button onclick="supSearch()">Find suppliers</button></div>
 <div class="status" id="supStatus"></div><pre id="supOut" style="display:none"></pre></div>
 <p class="hint">Full technical docs: <a href="/docs">/docs</a> · Status: <a href="/health">/health</a></p>
-</div><script>
-async function call(path, opts, outId, statusId){
-  const out=document.getElementById(outId), st=document.getElementById(statusId);
-  out.style.display='block'; st.innerHTML='<span class="wait">⏳ working…</span>'; out.textContent='';
-  try{
-    const r=await fetch(path,opts);
-    const ct=r.headers.get('content-type')||'';
-    if(!r.ok || !ct.includes('json')){
-      st.innerHTML='<span class="wait">⚠️ search needs its API keys first — paste them in Vercel → Settings → Environment Variables, then try again.</span>';
-      out.textContent=''; out.style.display='none'; return;
-    }
-    const j=await r.json();
-    out.textContent=JSON.stringify(j,null,2);
-    st.innerHTML='<span class="ok">✅ done</span>';
-  }catch(e){ st.innerHTML='<span class="wait">⚠️ '+e.message+'</span>'; }
+</div>
+<script>
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function setStatus(id,html){document.getElementById(id).innerHTML=html;}
+function showOut(id,html){const o=document.getElementById(id);o.style.display='block';o.innerHTML=html;}
+function hideOut(id){const o=document.getElementById(id);o.style.display='none';o.innerHTML='';}
+async function fetchJSON(path,opts){
+  const r=await fetch(path,opts);
+  const ct=r.headers.get('content-type')||'';
+  if(!r.ok){let msg='Search failed (HTTP '+r.status+')';try{const e=await r.json();if(e.detail)msg=msg+': '+e.detail;}catch(_){}throw new Error(msg);}
+  if(!ct.includes('json'))throw new Error('Unexpected response from server');
+  return r.json();
 }
-function kwSearch(){ const q=document.getElementById('kw').value.trim(); if(!q) return;
-  call('/search/keyword?q='+encodeURIComponent(q),{},'kwOut','kwStatus'); }
-function supSearch(){ const q=document.getElementById('sup').value.trim(); if(!q) return;
-  call('/search/suppliers?product='+encodeURIComponent(q),{},'supOut','supStatus'); }
+function renderKeyword(j){
+  if(!j.products||!j.products.length)return '<div class="res">No products found for "'+esc(j.query)+'".</div>';
+  let h='<div class="res"><b>'+j.products.length+' found:</b></div>';
+  j.products.forEach(p=>{h+='<div class="prodcard"><div class="nm">'+esc(p.name)+'</div><div class="meta">SKU: '+esc(p.sku||'-')+(p.sell_price?' · $'+p.sell_price:'')+'</div></div>';});
+  return h;
+}
+function renderSuppliers(j){
+  let h='<div class="res"><b>'+j.count+' wholesale suppliers</b>'+(j.blocked_filtered?' <span class="ok">('+j.blocked_filtered+' paid-ad sites blocked)</span>':'')+'</div>';
+  (j.suppliers||[]).forEach(s=>{h+='<div class="supcard"><a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.title)+'</a><div class="dom">'+esc(s.domain)+'</div><div class="snip">'+esc(s.snippet||'')+'</div></div>';});
+  return h;
+}
+function renderImage(j){
+  const idn=j.identification||{};
+  let h='<div class="idbox"><b>Identified:</b> '+esc(idn.name||'unknown');
+  if(idn.brand)h+=' · '+esc(idn.brand);
+  if(idn.model_number)h+=' · Model: '+esc(idn.model_number);
+  if(idn.confidence)h+=' <span class="ok">('+esc(idn.confidence)+' confidence)</span>';
+  h+='</div>';
+  if(j.catalog_matches&&j.catalog_matches.length){h+='<div class="res"><b>In your catalog:</b></div>';j.catalog_matches.forEach(p=>{h+='<div class="prodcard"><div class="nm">'+esc(p.name)+'</div><div class="meta">SKU: '+esc(p.sku||'-')+'</div></div>';});}
+  else if(j.note)h+='<div class="res">'+esc(j.note)+'</div>';
+  return h;
+}
+async function runSearch(path,opts,outId,statusId,render){
+  setStatus(statusId,'<span class="wait">⏳ working…</span>');hideOut(outId);
+  try{const j=await fetchJSON(path,opts);showOut(outId,render(j));setStatus(statusId,'<span class="ok">✅ done</span>');}
+  catch(e){setStatus(statusId,'<span class="err">⚠️ '+esc(e.message)+'</span>');}
+}
+function kwSearch(){const q=document.getElementById('kw').value.trim();if(!q)return;
+  runSearch('/search/keyword?q='+encodeURIComponent(q),{},'kwOut','kwStatus',renderKeyword);}
+function supSearch(){const q=document.getElementById('sup').value.trim();if(!q)return;
+  setStatus('supStatus','<span class="wait">⏳ searching wholesalers…</span>');hideOut('supOut');
+  runSearch('/search/suppliers?product='+encodeURIComponent(q),{},'supOut','supStatus',renderSuppliers);}
 function imgSearch(){
   const f=document.getElementById('imgFile').files[0];
-  const out=document.getElementById('imgOut'), st=document.getElementById('imgStatus');
-  if(!f){ st.innerHTML='<span class="wait">⚠️ pick a photo first</span>'; return; }
-  out.style.display='block'; st.innerHTML='<span class="wait">⏳ identifying…</span>';
-  const fd=new FormData(); fd.append('image',f,f.name||'photo.jpg');
-  call('/search/image',{method:'POST',body:fd},'imgOut','imgStatus');
+  if(!f){setStatus('imgStatus','<span class="wait">⚠️ pick a photo first</span>');return;}
+  setStatus('imgStatus','<span class="wait">⏳ identifying… (takes ~20s)</span>');hideOut('imgOut');
+  const fd=new FormData();fd.append('image',f,f.name||'photo.jpg');
+  runSearch('/search/image',{method:'POST',body:fd},'imgOut','imgStatus',renderImage);
 }
-fetch('/health').then(r=>r.json()).then(j=>{ if(j.ok) document.querySelector('.sub').innerHTML+=' <span class="ok">● API online</span>'; });
+fetch('/health').then(r=>r.json()).then(j=>{if(j.ok)document.querySelector('.sub').innerHTML+=' <span class="ok">● API online</span>';});
 </script></body></html>"""
 
 
