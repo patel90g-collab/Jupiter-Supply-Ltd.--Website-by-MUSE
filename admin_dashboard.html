@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jupiter Admin Dashboard — Preview</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#0b1830;color:#fff;min-height:100vh}
+.topbar{background:#0f1f3d;border-bottom:1px solid rgba(255,255,255,.1);padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+.topbar .logo{font-size:20px;font-weight:800;color:#D4A017}
+.topbar .ttl{font-size:15px;color:#9db2d8}
+.badge{margin-left:auto;background:#D4A017;color:#0f1f3d;font-weight:700;font-size:11px;padding:4px 12px;border-radius:20px;letter-spacing:1px}
+.layout{display:flex;min-height:calc(100vh - 57px)}
+.nav{width:200px;background:#0f1f3d;border-right:1px solid rgba(255,255,255,.08);padding:14px 8px;flex-shrink:0}
+.nav button{display:block;width:100%;text-align:left;background:none;border:0;color:#9db2d8;font-size:14px;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:2px}
+.nav button.on{background:rgba(212,160,23,.15);color:#D4A017;font-weight:700}
+.nav button:hover{background:rgba(255,255,255,.06)}
+.nav .sec{font-size:11px;color:#5b6b8c;letter-spacing:1px;padding:12px 12px 4px}
+.main{flex:1;padding:20px;max-width:900px}
+h2{font-size:20px;margin-bottom:4px}
+.psub{color:#9db2d8;font-size:13px;margin-bottom:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}
+.card b{font-size:26px;color:#D4A017;display:block}
+.card span{color:#9db2d8;font-size:12px}
+.search{width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:14px;margin-bottom:10px}
+.row{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;margin-bottom:8px}
+.row .nm{font-weight:700;font-size:14px}
+.row .org{color:#9db2d8;font-size:12px}
+.row .em{color:#7fb3ff;font-size:12px;word-break:break-all}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 10px;border-radius:12px;margin-left:8px}
+.Supplier{background:rgba(124,252,152,.18);color:#7CFC98}.Client{background:rgba(127,179,255,.18);color:#7fb3ff}
+.Service{background:rgba(212,160,23,.18);color:#D4A017}.Other{background:rgba(157,178,216,.18);color:#9db2d8}
+.New{background:rgba(124,252,152,.18);color:#7CFC98}
+.pipe{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
+.col{min-width:160px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px}
+.col h4{font-size:13px;color:#D4A017;margin-bottom:8px}
+.deal{background:rgba(255,255,255,.07);border-radius:8px;padding:8px;font-size:12px;margin-bottom:6px}
+.empty{border:2px dashed rgba(255,255,255,.2);border-radius:14px;padding:30px;text-align:center;color:#9db2d8;font-size:14px;margin-top:8px}
+.btn{display:inline-block;background:#D4A017;color:#0f1f3d;font-weight:700;font-size:14px;padding:10px 20px;border-radius:10px;border:0;cursor:pointer;margin-top:10px}
+.cat{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:14px}
+.cat .n{font-weight:600}
+.cat .c{color:#9db2d8;font-size:12px}
+.note{background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.3);border-radius:12px;padding:12px 14px;font-size:13px;color:#e8c96a;margin-bottom:14px}
+.page{display:none}.page.on{display:block}
+@media(max-width:640px){.nav{width:64px}.nav button span{display:none}.nav .sec{display:none}}
+</style></head><body>
+<div class="topbar"><span class="logo">🪐 JUPITER</span><span class="ttl">Admin Dashboard</span><span class="badge">PRIVATE PREVIEW</span></div>
+<div class="layout">
+<nav class="nav">
+<button class="on" onclick="go('dash',this)"><span>📊 Dashboard</span></button>
+<div class="sec"><span>CRM</span></div>
+<button onclick="go('leads',this)"><span>🎯 Leads</span></button>
+<button onclick="go('contacts',this)"><span>👥 Contacts</span></button>
+<button onclick="go('deals',this)"><span>💼 Deals</span></button>
+<div class="sec"><span>CATALOG</span></div>
+<button onclick="go('cats',this)"><span>📁 Categories</span></button>
+<button onclick="go('prods',this)"><span>📦 Products</span></button>
+<div class="sec"><span>SALES</span></div>
+<button onclick="go('quotes',this)"><span>📝 Quotes</span></button>
+<button onclick="go('orders',this)"><span>🛒 Orders</span></button>
+<button onclick="go('invoices',this)"><span>🧾 Invoices</span></button>
+</nav>
+<div class="main">
+
+<div class="page on" id="p-dash">
+<h2>Good evening, Gaurav 👋</h2><p class="psub">Here's your business at a glance.</p>
+<div class="cards">
+<div class="card"><b>69</b><span>CRM leads</span></div>
+<div class="card"><b>12</b><span>Categories</span></div>
+<div class="card"><b>0</b><span>Products (you'll add)</span></div>
+<div class="card"><b>0</b><span>Open deals</span></div>
+<div class="card"><b>0</b><span>Pending quotes</span></div>
+</div>
+<div class="note">💡 <b>Next up:</b> you wanted to create categories and products yourself — the Categories page is ready for you to build your catalog.</div>
+<h2 style="font-size:16px;margin-bottom:8px">Latest leads</h2>
+<div id="dashRecent"></div>
+</div>
+
+<div class="page" id="p-leads">
+<h2>🎯 Leads</h2><p class="psub">69 vendors & clients mined from your email.</p>
+<input class="search" id="lq" placeholder="🔍 Search leads…" oninput="renderLeads()">
+<div id="leadList"></div>
+</div>
+
+<div class="page" id="p-contacts">
+<h2>👥 Contacts</h2><p class="psub">People attached to your leads.</p>
+<input class="search" id="cq" placeholder="🔍 Search contacts…" oninput="renderContacts()">
+<div id="contactList"></div>
+</div>
+
+<div class="page" id="p-deals">
+<h2>💼 Deals Pipeline</h2><p class="psub">Drag deals through your pipeline. (Preview — interactive in the live version.)</p>
+<div class="pipe">
+<div class="col"><h4>🆕 New</h4><div class="deal">No deals yet</div></div>
+<div class="col"><h4>📞 Contacted</h4><div class="deal">—</div></div>
+<div class="col"><h4>✅ Qualified</h4><div class="deal">—</div></div>
+<div class="col"><h4>🏆 Won</h4><div class="deal">—</div></div>
+<div class="col"><h4>❌ Lost</h4><div class="deal">—</div></div>
+</div>
+<div class="note">💡 Your 69 leads are ready to become deals — in the live dashboard you'll convert any lead into a deal with one tap.</div>
+</div>
+
+<div class="page" id="p-cats">
+<h2>📁 Categories</h2><p class="psub">Your 12 departments. Add subcategories and products under each.</p>
+<div id="catList"></div>
+<button class="btn" onclick="alert('Category builder opens in the live dashboard')">+ New Category</button>
+</div>
+
+<div class="page" id="p-prods">
+<h2>📦 Products</h2><p class="psub">Your catalog lives here — you add every product yourself.</p>
+<div class="empty">No products yet.<br>Tap below to add your first product.</div>
+<button class="btn" onclick="alert('Product builder opens in the live dashboard')">+ Add Product</button>
+</div>
+
+<div class="page" id="p-quotes">
+<h2>📝 Quotes</h2><p class="psub">Numbering: JS-Q-000001, JS-Q-000002…</p>
+<div class="empty">No quotes yet.<br>Quotes you create will appear here for your approval.</div>
+<button class="btn" onclick="alert('Quote builder opens in the live dashboard')">+ New Quote</button>
+</div>
+
+<div class="page" id="p-orders">
+<h2>🛒 Orders</h2><p class="psub">Customer orders flow here.</p>
+<div class="empty">No orders yet.</div>
+</div>
+
+<div class="page" id="p-invoices">
+<h2>🧾 Invoices</h2><p class="psub">Invoices & payments, QuickBooks-style.</p>
+<div class="empty">No invoices yet.</div>
+</div>
+
+</div></div>
+<script>
+const LEADS=[{"name": "Davrylmar", "email": "davrylmar@gmail.com", "org": "", "type": "Client", "count": "7", "last": "2026-06-16", "first": "2026-05-05"}, {"name": "Vision Canada", "email": "visioncanada2023@gmail.com", "org": "", "type": "Client", "count": "1", "last": "2026-10-16", "first": "2026-10-16"}, {"name": "Yvette Boisvert", "email": "yvetteboisvert@yahoo.ca", "org": "", "type": "Client", "count": "3", "last": "2024-03-18", "first": "2024-03-04"}, {"name": "Viral Dhamdhere", "email": "viral_557@hotmail.com", "org": "(friend / deal partner)", "type": "Client", "count": "11", "last": "2026-10-13", "first": "2026-07-16"}, {"name": "Barry Melsness", "email": "bmelsness@derrickclub.com", "org": "Derrick Club", "type": "Client", "count": "4", "last": "2026-10-01", "first": "2026-09-04"}, {"name": "Derrick Club Banquets", "email": "banquets@derrickclub.com", "org": "Derrick Club", "type": "Client", "count": "3", "last": "2026-10-01", "first": "2026-09-04"}, {"name": "Laurenne Emond", "email": "laurenne@emondenterprises.com", "org": "Emond Enterprises", "type": "Client", "count": "1", "last": "2026-10-13", "first": "2026-10-13"}, {"name": "Uriel Jerry Rebanal", "email": "jerryr@genesishospitality.ca", "org": "Genesis Hospitality", "type": "Client", "count": "3", "last": "2026-04-20", "first": "2026-04-17"}, {"name": "Susana Arcilla", "email": "susan.arcilla@hilton.com", "org": "Hilton", "type": "Client", "count": "2", "last": "2026-03-19", "first": "2026-03-17"}, {"name": "Urvish Bhatt", "email": "urvish.bhatt@hilton.com", "org": "Hilton", "type": "Client", "count": "12", "last": "2026-10-06", "first": "2026-10-05"}, {"name": "Gaurav Jesrani", "email": "gaurav.jesrani@hilton.com", "org": "Hilton Garden Inn West Edmonton", "type": "Client", "count": "15", "last": "2026-10-14", "first": "2026-03-17"}, {"name": "Shirley Hannink", "email": "shirley@hiecws.com", "org": "Holiday Inn Express", "type": "Client", "count": "1", "last": "2026-03-27", "first": "2026-03-27"}, {"name": "Shirley Hannink", "email": "shannink@hiecws.com", "org": "Holiday Inn Express", "type": "Client", "count": "2", "last": "2026-05-04", "first": "2026-03-27"}, {"name": "Rishu Singh", "email": "rishu@kastelholdings.com", "org": "Kastel Holdings", "type": "Client", "count": "4", "last": "2026-10-03", "first": "2026-09-27"}, {"name": "Jeeian Panting", "email": "gmramadawc@kastelholdings.com", "org": "Kastel Holdings / Ramada Whitecourt", "type": "Client", "count": "4", "last": "2026-10-03", "first": "2026-09-27"}, {"name": "Akanshu Popli", "email": "info@poplihospitality.com", "org": "Popli Hospitality", "type": "Client", "count": "11", "last": "2026-10-03", "first": "2026-08-19"}, {"name": "Vinod Masih", "email": "vinod@sbsedmonton.com", "org": "Staybridge Suites West Edmonton", "type": "Client", "count": "4", "last": "2026-08-19", "first": "2026-08-12"}, {"name": "Mukul Aggarwal", "email": "mukul.aggarwal@sunraygroup.ca", "org": "Sunray Group", "type": "Client", "count": "9", "last": "2026-10-06", "first": "2026-10-05"}, {"name": "Talbot Arm Motel", "email": "moteltalbotarm@gmail.com", "org": "Talbot Arm Motel", "type": "Client", "count": "5", "last": "2026-05-05", "first": "2026-02-11"}, {"name": "Mvillage", "email": "mvillage@telus.net", "org": "", "type": "Other", "count": "1", "last": "2024-09-30", "first": "2024-09-30"}, {"name": "Varughese Arattu", "email": "varughesearattu@gmail.com", "org": "(personal)", "type": "Other", "count": "1", "last": "2026-07-14", "first": "2026-07-14"}, {"name": "Navneet Singh", "email": "navneet.singh@jafferinc.com", "org": "Jaffer Inc.", "type": "Other", "count": "1", "last": "2026-09-04", "first": "2026-09-04"}, {"name": "Mostafa Mansour", "email": "mostaqma@amazon.com", "org": "Amazon", "type": "Service", "count": "2", "last": "2026-09-22", "first": "2026-09-21"}, {"name": "American Express Merchant Services", "email": "americanexpress@email.americanexpress.com", "org": "American Express Merchant Services", "type": "Service", "count": "4", "last": "2026-04-30", "first": "2023-08-01"}, {"name": "Sarah Brown", "email": "sarah.brown@creditcardgateway.ca", "org": "Credit Card Gateway", "type": "Service", "count": "2", "last": "2026-10-01", "first": "2026-08-26"}, {"name": "Aayat Mir", "email": "aayat.mir@moneris.com", "org": "Moneris", "type": "Service", "count": "1", "last": "2023-10-27", "first": "2023-10-27"}, {"name": "Amber Lynn Johnston", "email": "amberlynn.johnston@moneris.com", "org": "Moneris", "type": "Service", "count": "3", "last": "2023-08-01", "first": "2023-07-26"}, {"name": "Von Ducay", "email": "von.ducay@moneris.com", "org": "Moneris", "type": "Service", "count": "65", "last": "2026-02-26", "first": "2023-07-19"}, {"name": "Barinder Bhamra", "email": "barinder@rk-cpa.ca", "org": "RK Professional Corp (accountant)", "type": "Service", "count": "22", "last": "2026-10-08", "first": "2024-12-02"}, {"name": "RK Professional Corp", "email": "info@rk-cpa.ca", "org": "RK Professional Corp (accountant)", "type": "Service", "count": "28", "last": "2026-10-02", "first": "2023-07-20"}, {"name": "Shabbir Banu", "email": "shabbir@rk-cpa.ca", "org": "RK Professional Corp (accountant)", "type": "Service", "count": "30", "last": "2026-10-08", "first": "2024-12-02"}, {"name": "Yissete Vega Beltran", "email": "yvegabeltran@yelp.com", "org": "Yelp", "type": "Service", "count": "4", "last": "2026-06-30", "first": "2026-06-22"}, {"name": "Baiying Trade", "email": "info@baiyingtrade.com", "org": "Baiying Trade", "type": "Supplier", "count": "1", "last": "2026-09-02", "first": "2026-09-02"}, {"name": "Anna Raj", "email": "annaraj@bannarimills.com", "org": "Bannari Mills", "type": "Supplier", "count": "2", "last": "2026-10-10", "first": "2026-09-12"}, {"name": "Saravanan HT", "email": "saravanan.ht@bannarimills.in", "org": "Bannari Mills", "type": "Supplier", "count": "4", "last": "2026-10-12", "first": "2026-09-11"}, {"name": "Sudipto Sen", "email": "sudipto@bannarimills.com", "org": "Bannari Mills", "type": "Supplier", "count": "3", "last": "2026-10-12", "first": "2026-09-12"}, {"name": "Merry", "email": "merry@bosharon.cn", "org": "Bosharon", "type": "Supplier", "count": "4", "last": "2026-10-14", "first": "2026-09-22"}, {"name": "B Hicks", "email": "bhicks@busy-bee.ca", "org": "Busy Bee", "type": "Supplier", "count": "4", "last": "2026-09-01", "first": "2026-08-21"}, {"name": "Jay", "email": "jay@busy-bee.ca", "org": "Busy Bee", "type": "Supplier", "count": "1", "last": "2026-09-03", "first": "2026-09-03"}, {"name": "Twila", "email": "twila@busy-bee.ca", "org": "Busy Bee", "type": "Supplier", "count": "24", "last": "2026-10-13", "first": "2026-05-20"}, {"name": "Verna", "email": "verna@busy-bee.ca", "org": "Busy Bee", "type": "Supplier", "count": "4", "last": "2026-09-29", "first": "2026-09-10"}, {"name": "Direct Textile Store", "email": "sent-with@powr.io", "org": "Direct Textile Store", "type": "Supplier", "count": "1", "last": "2026-07-15", "first": "2026-07-15"}, {"name": "Doods Carbonell", "email": "edmontonsw@fullypromoted.ca", "org": "Fully Promoted Edmonton SW", "type": "Supplier", "count": "3", "last": "2026-07-03", "first": "2026-07-02"}, {"name": "Michelle", "email": "michelle@greatboomhousewares.com", "org": "Great Boom Housewares", "type": "Supplier", "count": "1", "last": "2026-10-02", "first": "2026-10-02"}, {"name": "Guanhua Paper Sales", "email": "esales5@guanhuapaper.com", "org": "Guanhua Paper", "type": "Supplier", "count": "1", "last": "2023-07-19", "first": "2023-07-19"}, {"name": "Haplast Deputy Manager", "email": "pk.deputymanager@haplast.vn", "org": "Haplast Vietnam", "type": "Supplier", "count": "1", "last": "2024-11-20", "first": "2024-11-20"}, {"name": "Kam Khiamal", "email": "kam_khiamal@homedepot.com", "org": "Home Depot", "type": "Supplier", "count": "1", "last": "2026-06-03", "first": "2026-06-03"}, {"name": "Luis A Rico Garcia", "email": "luis_a_rico_garcia@homedepot.com", "org": "Home Depot", "type": "Supplier", "count": "3", "last": "2026-06-12", "first": "2026-06-03"}, {"name": "Mariam Hussein", "email": "mariam_hussein@homedepot.com", "org": "Home Depot", "type": "Supplier", "count": "1", "last": "2026-06-03", "first": "2026-06-03"}, {"name": "Mildred Gayla", "email": "mildred_gayla@homedepot.com", "org": "Home Depot", "type": "Supplier", "count": "1", "last": "2026-06-03", "first": "2026-06-03"}, {"name": "Home Depot Pro Desk 7248", "email": "prodesk_7248@homedepot.com", "org": "Home Depot Pro Desk", "type": "Supplier", "count": "7", "last": "2026-06-12", "first": "2026-05-29"}, {"name": "Edward Chan", "email": "edward@havaseat.com", "org": "ISA / Havaseat", "type": "Supplier", "count": "5", "last": "2026-10-13", "first": "2026-10-06"}, {"name": "ISA", "email": "isa@havaseat.com", "org": "ISA / Havaseat", "type": "Supplier", "count": "1", "last": "2026-10-06", "first": "2026-10-06"}, {"name": "Jessica Athi", "email": "reception@havaseat.com", "org": "ISA / Havaseat", "type": "Supplier", "count": "2", "last": "2026-10-06", "first": "2026-10-06"}, {"name": "Inkrite Ltd", "email": "inkrite15@gmail.com", "org": "Inkrite Ltd.", "type": "Supplier", "count": "1", "last": "2023-07-26", "first": "2023-07-26"}, {"name": "Jennifer", "email": "jennifer@nicejy.com", "org": "Jiuyang (Janitorial)", "type": "Supplier", "count": "4", "last": "2026-10-06", "first": "2026-10-02"}, {"name": "Linen Mart Sales", "email": "sales@linenmart.ca", "org": "Linen Mart", "type": "Supplier", "count": "7", "last": "2026-08-07", "first": "2026-07-22"}, {"name": "Linen Mart", "email": "contact@linenmart.ca", "org": "Linen Mart", "type": "Supplier", "count": "1", "last": "2026-07-22", "first": "2026-07-22"}, {"name": "Omland Hospitality", "email": "csr@omlandhospitality.com", "org": "Omland Hospitality", "type": "Supplier", "count": "3", "last": "2026-03-31", "first": "2026-03-26"}, {"name": "Rita", "email": "rita@paishitex.com", "org": "Paishi Tex", "type": "Supplier", "count": "1", "last": "2026-09-11", "first": "2026-09-11"}, {"name": "Sijo", "email": "sijo@primefoodclub.com", "org": "Prime Food Club", "type": "Supplier", "count": "1", "last": "2026-07-16", "first": "2026-07-16"}, {"name": "Shirin Group", "email": "gm.cn387@shirin.group", "org": "Shirin Group", "type": "Supplier", "count": "1", "last": "2026-09-21", "first": "2026-09-21"}, {"name": "Sun Linen", "email": "accsunlinen0822@gmail.com", "org": "Sun Linen", "type": "Supplier", "count": "4", "last": "2026-09-01", "first": "2026-07-28"}, {"name": "Sun Linen Customer Service", "email": "sunlinentowels@gmail.com", "org": "Sun Linen & Towels Inc.", "type": "Supplier", "count": "11", "last": "2026-08-28", "first": "2026-07-22"}, {"name": "Sachin Kumar", "email": "sachin.kumar@sunbridgeindia.ca", "org": "Sunbridge India", "type": "Supplier", "count": "10", "last": "2026-10-06", "first": "2026-10-05"}, {"name": "Farzana Batool", "email": "fbatool@winsham.com", "org": "Winsham Fabrik", "type": "Supplier", "count": "20", "last": "2024-10-31", "first": "2023-09-05"}, {"name": "Varughese Arattu", "email": "varughese@winsham.com", "org": "Winsham Fabrik", "type": "Supplier", "count": "27", "last": "2024-10-31", "first": "2023-09-01"}, {"name": "Winsham Edmonton", "email": "wsedmar@winsham.com", "org": "Winsham Fabrik", "type": "Supplier", "count": "8", "last": "2026-10-07", "first": "2026-02-17"}, {"name": "Winsham Fabrik Invoices", "email": "winshamedmontoninvoices@gmail.com", "org": "Winsham Fabrik Canada Ltd.", "type": "Supplier", "count": "14", "last": "2023-11-06", "first": "2023-09-26"}];
+const CATS=["Guest Amenities", "Housekeeping", "Room Supplies", "Bathroom", "Operations", "Furniture", "Appliances", "Bed & Bath Linens", "Towels", "Janitorial", "Hotel Slippers", "Healthcare Textiles"];
+function go(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById('p-'+id).classList.add('on');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function leadRow(l){return `<div class="row"><span class="nm">${l.name}</span><span class="tag ${l.type}">${l.type}</span><div class="org">${l.org}</div><div class="em">${l.email}</div><div class="org" style="margin-top:4px">${l.count} emails · ${l.first} → ${l.last}</div></div>`;}
+function renderLeads(){const q=document.getElementById('lq').value.toLowerCase();const r=LEADS.filter(l=>!q||(l.name+' '+l.org+' '+l.email).toLowerCase().includes(q));document.getElementById('leadList').innerHTML=r.map(leadRow).join('')||'<div class="empty">No matches.</div>';}
+function renderContacts(){const q=document.getElementById('cq').value.toLowerCase();const r=LEADS.filter(l=>!q||(l.name+' '+l.org+' '+l.email).toLowerCase().includes(q));document.getElementById('contactList').innerHTML=r.map(l=>`<div class="row"><span class="nm">${l.name}</span><span class="tag ${l.type}">${l.type}</span><div class="org">${l.org}</div><div class="em">${l.email}</div></div>`).join('')||'<div class="empty">No matches.</div>';}
+document.getElementById('catList').innerHTML=CATS.map(c=>`<div class="cat"><span class="n">📁 ${c}</span><span class="c">0 subcategories · 0 products</span></div>`).join('');
+document.getElementById('dashRecent').innerHTML=LEADS.slice(0,5).map(leadRow).join('');
+renderLeads();renderContacts();
+</script></body></html>

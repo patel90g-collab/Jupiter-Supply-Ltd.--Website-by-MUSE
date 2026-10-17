@@ -1,0 +1,11 @@
+# Jupiter Supply Ltd. — AI Product Search Engine API
+# Python 3.10+
+
+fastapi>=0.110.0
+# uvicorn is only for local dev (uvicorn main:app); Vercel serverless does not need it.
+supabase>=2.4.0          # PostgREST client (service_role key server-side only)
+httpx>=0.27.0            # NVIDIA NIM + web-search provider calls
+python-multipart>=0.0.9  # image upload parsing
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+python-dotenv>=1.0.0
