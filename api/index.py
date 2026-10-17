@@ -65,6 +65,20 @@ async def health():
     return {"ok": True, "service": "jupiter-search", "version": "0.1.1"}
 
 
+@app.get("/debug/env-check")
+async def env_check():
+    import os
+    def present(name: str) -> dict:
+        v = os.environ.get(name, "")
+        return {"present": bool(v), "length": len(v)}
+    return {
+        "SUPABASE_URL": present("SUPABASE_URL"),
+        "SUPABASE_SERVICE_ROLE_KEY": present("SUPABASE_SERVICE_ROLE_KEY"),
+        "NVIDIA_API_KEY": present("NVIDIA_API_KEY"),
+        "SEARCH_API_KEY": present("SEARCH_API_KEY"),
+    }
+
+
 PREVIEW_HTML = """<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Jupiter Supply — AI Search Engine (Preview)</title>
