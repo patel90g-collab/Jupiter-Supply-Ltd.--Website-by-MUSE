@@ -20,7 +20,7 @@ from routers.search import router as search_router
 
 app = FastAPI(
     title="Jupiter Supply — AI Product Search Engine",
-    version="0.1.0",
+    version="0.1.1",
     description=(
         "Keyword + AI image product search and wholesale supplier finder "
         "for Jupiter Supply Ltd. Read-only search; every outbound send "
@@ -62,7 +62,7 @@ app.include_router(search_router)
 
 @app.get("/health")
 async def health():
-    return {"ok": True, "service": "jupiter-search", "version": "0.1.0"}
+    return {"ok": True, "service": "jupiter-search", "version": "0.1.1"}
 
 
 PREVIEW_HTML = """<!DOCTYPE html>
