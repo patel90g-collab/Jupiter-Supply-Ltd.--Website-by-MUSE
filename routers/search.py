@@ -286,9 +286,13 @@ async def image_search(
             detail=f"Vision model unreachable: {exc}",
         )
 
-    # Parse the model's JSON (tolerate stray markdown fences).
+    # Parse the model's JSON (tolerate stray markdown fences and surrounding chatter).
     cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(),
                      flags=re.MULTILINE).strip()
+    # If the model wrapped JSON in prose, extract the first {...} block.
+    if not cleaned.startswith("{"):
+        m = re.search(r"\{.*\}", cleaned, flags=re.DOTALL)
+        cleaned = m.group(0) if m else cleaned
     try:
         ident = ImageIdentification(**json.loads(cleaned))
     except Exception:

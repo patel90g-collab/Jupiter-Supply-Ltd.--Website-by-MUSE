@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from supabase import Client
 
@@ -66,27 +65,7 @@ async def health():
     return {"ok": True, "service": "jupiter-search", "version": "0.1.1"}
 
 
-@app.exception_handler(Exception)
-async def debug_exception_handler(request, exc):
-    import traceback
-    return JSONResponse(
-        status_code=500,
-        content={"debug_traceback": traceback.format_exception(type(exc), exc, exc.__traceback__)},
-    )
 
-
-@app.get("/debug/env-check")
-async def env_check():
-    import os
-    def present(name: str) -> dict:
-        v = os.environ.get(name, "")
-        return {"present": bool(v), "length": len(v)}
-    return {
-        "SUPABASE_URL": present("SUPABASE_URL"),
-        "SUPABASE_SERVICE_ROLE_KEY": present("SUPABASE_SERVICE_ROLE_KEY"),
-        "NVIDIA_API_KEY": present("NVIDIA_API_KEY"),
-        "SEARCH_API_KEY": present("SEARCH_API_KEY"),
-    }
 
 
 PREVIEW_HTML = """<!DOCTYPE html>
