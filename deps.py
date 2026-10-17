@@ -44,7 +44,6 @@ def get_settings() -> Settings:
     return Settings()
 
 
-@lru_cache
 def get_supabase(settings: Settings = Depends(get_settings)) -> Client:
     """Service-role client. Runs server-side only; never expose the key."""
     if not settings.supabase_url or not settings.supabase_service_role_key:
