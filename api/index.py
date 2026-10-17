@@ -65,6 +65,15 @@ async def health():
     return {"ok": True, "service": "jupiter-search", "version": "0.1.1"}
 
 
+@app.exception_handler(Exception)
+async def debug_exception_handler(request, exc):
+    import traceback
+    return JSONResponse(
+        status_code=500,
+        content={"debug_traceback": traceback.format_exception(type(exc), exc, exc.__traceback__)},
+    )
+
+
 @app.get("/debug/env-check")
 async def env_check():
     import os
