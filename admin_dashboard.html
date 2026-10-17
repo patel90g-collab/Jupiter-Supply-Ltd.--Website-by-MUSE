@@ -1,141 +1,371 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Jupiter Admin Dashboard — Preview</title>
+<title>Jupiter Supply — Master Dashboard</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#0b1830;color:#fff;min-height:100vh}
-.topbar{background:#0f1f3d;border-bottom:1px solid rgba(255,255,255,.1);padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
-.topbar .logo{font-size:20px;font-weight:800;color:#D4A017}
-.topbar .ttl{font-size:15px;color:#9db2d8}
-.badge{margin-left:auto;background:#D4A017;color:#0f1f3d;font-weight:700;font-size:11px;padding:4px 12px;border-radius:20px;letter-spacing:1px}
-.layout{display:flex;min-height:calc(100vh - 57px)}
-.nav{width:200px;background:#0f1f3d;border-right:1px solid rgba(255,255,255,.08);padding:14px 8px;flex-shrink:0}
-.nav button{display:block;width:100%;text-align:left;background:none;border:0;color:#9db2d8;font-size:14px;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:2px}
-.nav button.on{background:rgba(212,160,23,.15);color:#D4A017;font-weight:700}
-.nav button:hover{background:rgba(255,255,255,.06)}
-.nav .sec{font-size:11px;color:#5b6b8c;letter-spacing:1px;padding:12px 12px 4px}
-.main{flex:1;padding:20px;max-width:900px}
-h2{font-size:20px;margin-bottom:4px}
-.psub{color:#9db2d8;font-size:13px;margin-bottom:16px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
-.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}
-.card b{font-size:26px;color:#D4A017;display:block}
-.card span{color:#9db2d8;font-size:12px}
-.search{width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:14px;margin-bottom:10px}
-.row{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;margin-bottom:8px}
-.row .nm{font-weight:700;font-size:14px}
-.row .org{color:#9db2d8;font-size:12px}
-.row .em{color:#7fb3ff;font-size:12px;word-break:break-all}
-.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 10px;border-radius:12px;margin-left:8px}
-.Supplier{background:rgba(124,252,152,.18);color:#7CFC98}.Client{background:rgba(127,179,255,.18);color:#7fb3ff}
-.Service{background:rgba(212,160,23,.18);color:#D4A017}.Other{background:rgba(157,178,216,.18);color:#9db2d8}
-.New{background:rgba(124,252,152,.18);color:#7CFC98}
-.pipe{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
-.col{min-width:160px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px}
-.col h4{font-size:13px;color:#D4A017;margin-bottom:8px}
-.deal{background:rgba(255,255,255,.07);border-radius:8px;padding:8px;font-size:12px;margin-bottom:6px}
-.empty{border:2px dashed rgba(255,255,255,.2);border-radius:14px;padding:30px;text-align:center;color:#9db2d8;font-size:14px;margin-top:8px}
-.btn{display:inline-block;background:#D4A017;color:#0f1f3d;font-weight:700;font-size:14px;padding:10px 20px;border-radius:10px;border:0;cursor:pointer;margin-top:10px}
-.cat{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:14px}
-.cat .n{font-weight:600}
-.cat .c{color:#9db2d8;font-size:12px}
-.note{background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.3);border-radius:12px;padding:12px 14px;font-size:13px;color:#e8c96a;margin-bottom:14px}
-.page{display:none}.page.on{display:block}
-@media(max-width:640px){.nav{width:64px}.nav button span{display:none}.nav .sec{display:none}}
+:root{--navy:#0f1f3d;--gold:#D4A017;--bg:#f4f6fb;--card:#fff;--txt:#1c2b4a;--mut:#6b7a99;--line:#e3e8f2}
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+.top{background:var(--navy);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+.top .logo{font-weight:800;font-size:18px}.top .logo span{color:var(--gold)}
+.top .badge{background:var(--gold);color:var(--navy);font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.5px}
+.top .sp{flex:1}.top a{color:#9db2d8;font-size:13px;text-decoration:none;margin-left:14px}
+.layout{display:flex;min-height:calc(100vh - 52px)}
+.side{width:210px;background:#fff;border-right:1px solid var(--line);padding:14px 8px;position:sticky;top:52px;height:calc(100vh - 52px);overflow:auto}
+.side .grp{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);padding:12px 12px 4px}
+.side button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:8px;font-size:14px;color:var(--txt);cursor:pointer}
+.side button:hover{background:#eef2fa}
+.side button.on{background:var(--navy);color:#fff;font-weight:600}
+.main{flex:1;padding:22px;max-width:1180px}
+.hd{display:flex;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.hd h2{font-size:22px}.hd .sp{flex:1}
+.btn{background:var(--gold);color:var(--navy);border:0;border-radius:8px;padding:9px 16px;font-weight:700;font-size:14px;cursor:pointer}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--txt)}
+.btn.danger{background:#fff;border:1px solid #f0b0b0;color:#c0392b}
+.btn.sm{padding:5px 10px;font-size:12px;margin:1px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat .n{font-size:22px;font-weight:800}.stat .l{font-size:12px;color:var(--mut);margin-top:2px}
+.tblwrap{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f7f9fd;text-align:left;padding:10px 12px;color:var(--mut);font-weight:600;white-space:nowrap}
+td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+tr:hover td{background:#fafcff}
+.tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600;background:#eef2fa;color:var(--navy)}
+.tag.green{background:#e6f7ea;color:#1e7e34}.tag.gold{background:#fdf3d8;color:#8a6d00}.tag.red{background:#fdecea;color:#c0392b}
+.empty{padding:36px;text-align:center;color:var(--mut)}
+.modal{position:fixed;inset:0;background:rgba(15,31,61,.55);display:none;align-items:flex-start;justify-content:center;z-index:50;padding:30px 12px;overflow:auto}
+.modal.open{display:flex}
+.form{background:#fff;border-radius:14px;padding:22px;width:100%;max-width:560px}
+.form h3{margin-bottom:14px;font-size:18px}
+.fld{margin-bottom:12px}.fld label{display:block;font-size:12px;color:var(--mut);margin-bottom:4px;font-weight:600}
+.fld input,.fld select,.fld textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit}
+.fld textarea{resize:vertical;min-height:64px}
+.frow{display:flex;gap:10px}.frow .fld{flex:1}
+.fact{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px}.chk input{width:auto}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 20px;border-radius:10px;font-size:14px;display:none;z-index:99;max-width:90vw}
+.items{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:12px}
+.irow{display:flex;gap:8px;margin-bottom:8px}.irow input{padding:7px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+.irow .d{flex:2}.irow .q,.irow .p{flex:1;min-width:0}
+.rep{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;max-width:680px}
+.rep h3{margin-bottom:10px}.rep table td:last-child,.rep table th:last-child{text-align:right}
+.rep .tot td{font-weight:800;border-top:2px solid var(--txt)}
+.note{color:var(--mut);font-size:13px;margin-top:8px}
+@media(max-width:760px){.side{width:60px}.side button{font-size:0}.side button::first-letter{font-size:14px}.side .grp{display:none}.main{padding:14px}}
 </style></head><body>
-<div class="topbar"><span class="logo">🪐 JUPITER</span><span class="ttl">Admin Dashboard</span><span class="badge">PRIVATE PREVIEW</span></div>
+<div class="top"><div class="logo">🪐 JUPITER <span>SUPPLY</span></div><div class="badge">MASTER DASHBOARD</div><div class="sp"></div><a href="/crm">CRM</a><a href="/">Search</a><a href="/docs">API</a></div>
 <div class="layout">
-<nav class="nav">
-<button class="on" onclick="go('dash',this)"><span>📊 Dashboard</span></button>
-<div class="sec"><span>CRM</span></div>
-<button onclick="go('leads',this)"><span>🎯 Leads</span></button>
-<button onclick="go('contacts',this)"><span>👥 Contacts</span></button>
-<button onclick="go('deals',this)"><span>💼 Deals</span></button>
-<div class="sec"><span>CATALOG</span></div>
-<button onclick="go('cats',this)"><span>📁 Categories</span></button>
-<button onclick="go('prods',this)"><span>📦 Products</span></button>
-<div class="sec"><span>SALES</span></div>
-<button onclick="go('quotes',this)"><span>📝 Quotes</span></button>
-<button onclick="go('orders',this)"><span>🛒 Orders</span></button>
-<button onclick="go('invoices',this)"><span>🧾 Invoices</span></button>
-</nav>
-<div class="main">
-
-<div class="page on" id="p-dash">
-<h2>Good evening, Gaurav 👋</h2><p class="psub">Here's your business at a glance.</p>
-<div class="cards">
-<div class="card"><b>69</b><span>CRM leads</span></div>
-<div class="card"><b>12</b><span>Categories</span></div>
-<div class="card"><b>0</b><span>Products (you'll add)</span></div>
-<div class="card"><b>0</b><span>Open deals</span></div>
-<div class="card"><b>0</b><span>Pending quotes</span></div>
+<div class="side" id="nav"></div>
+<div class="main" id="main"><div class="empty">Loading…</div></div>
 </div>
-<div class="note">💡 <b>Next up:</b> you wanted to create categories and products yourself — the Categories page is ready for you to build your catalog.</div>
-<h2 style="font-size:16px;margin-bottom:8px">Latest leads</h2>
-<div id="dashRecent"></div>
-</div>
-
-<div class="page" id="p-leads">
-<h2>🎯 Leads</h2><p class="psub">69 vendors & clients mined from your email.</p>
-<input class="search" id="lq" placeholder="🔍 Search leads…" oninput="renderLeads()">
-<div id="leadList"></div>
-</div>
-
-<div class="page" id="p-contacts">
-<h2>👥 Contacts</h2><p class="psub">People attached to your leads.</p>
-<input class="search" id="cq" placeholder="🔍 Search contacts…" oninput="renderContacts()">
-<div id="contactList"></div>
-</div>
-
-<div class="page" id="p-deals">
-<h2>💼 Deals Pipeline</h2><p class="psub">Drag deals through your pipeline. (Preview — interactive in the live version.)</p>
-<div class="pipe">
-<div class="col"><h4>🆕 New</h4><div class="deal">No deals yet</div></div>
-<div class="col"><h4>📞 Contacted</h4><div class="deal">—</div></div>
-<div class="col"><h4>✅ Qualified</h4><div class="deal">—</div></div>
-<div class="col"><h4>🏆 Won</h4><div class="deal">—</div></div>
-<div class="col"><h4>❌ Lost</h4><div class="deal">—</div></div>
-</div>
-<div class="note">💡 Your 69 leads are ready to become deals — in the live dashboard you'll convert any lead into a deal with one tap.</div>
-</div>
-
-<div class="page" id="p-cats">
-<h2>📁 Categories</h2><p class="psub">Your 12 departments. Add subcategories and products under each.</p>
-<div id="catList"></div>
-<button class="btn" onclick="alert('Category builder opens in the live dashboard')">+ New Category</button>
-</div>
-
-<div class="page" id="p-prods">
-<h2>📦 Products</h2><p class="psub">Your catalog lives here — you add every product yourself.</p>
-<div class="empty">No products yet.<br>Tap below to add your first product.</div>
-<button class="btn" onclick="alert('Product builder opens in the live dashboard')">+ Add Product</button>
-</div>
-
-<div class="page" id="p-quotes">
-<h2>📝 Quotes</h2><p class="psub">Numbering: JS-Q-000001, JS-Q-000002…</p>
-<div class="empty">No quotes yet.<br>Quotes you create will appear here for your approval.</div>
-<button class="btn" onclick="alert('Quote builder opens in the live dashboard')">+ New Quote</button>
-</div>
-
-<div class="page" id="p-orders">
-<h2>🛒 Orders</h2><p class="psub">Customer orders flow here.</p>
-<div class="empty">No orders yet.</div>
-</div>
-
-<div class="page" id="p-invoices">
-<h2>🧾 Invoices</h2><p class="psub">Invoices & payments, QuickBooks-style.</p>
-<div class="empty">No invoices yet.</div>
-</div>
-
-</div></div>
+<div class="modal" id="modal"><div class="form" id="formbox"></div></div>
+<div class="toast" id="toast"></div>
 <script>
-const LEADS=[{"name": "Davrylmar", "email": "davrylmar@gmail.com", "org": "", "type": "Client", "count": "7", "last": "2026-06-16", "first": "2026-05-05"}, {"name": "Vision Canada", "email": "visioncanada2023@gmail.com", "org": "", "type": "Client", "count": "1", "last": "2026-10-16", "first": "2026-10-16"}, {"name": "Yvette Boisvert", "email": "yvetteboisvert@yahoo.ca", "org": "", "type": "Client", "count": "3", "last": "2024-03-18", "first": "2024-03-04"}, {"name": "Viral Dhamdhere", "email": "viral_557@hotmail.com", "org": "(friend / deal partner)", "type": "Client", "count": "11", "last": "2026-10-13", "first": "2026-07-16"}, {"name": "Barry Melsness", "email": "bmelsness@derrickclub.com", "org": "Derrick Club", "type": "Client", "count": "4", "last": "2026-10-01", "first": "2026-09-04"}, {"name": "Derrick Club Banquets", "email": "banquets@derrickclub.com", "org": "Derrick Club", "type": "Client", "count": "3", "last": "2026-10-01", "first": "2026-09-04"}, {"name": "Laurenne Emond", "email": "laurenne@emondenterprises.com", "org": "Emond Enterprises", "type": "Client", "count": "1", "last": "2026-10-13", "first": "2026-10-13"}, {"name": "Uriel Jerry Rebanal", "email": "jerryr@genesishospitality.ca", "org": "Genesis Hospitality", "type": "Client", "count": "3", "last": "2026-04-20", "first": "2026-04-17"}, {"name": "Susana Arcilla", "email": "susan.arcilla@hilton.com", "org": "Hilton", "type": "Client", "count": "2", "last": "2026-03-19", "first": "2026-03-17"}, {"name": "Urvish Bhatt", "email": "urvish.bhatt@hilton.com", "org": "Hilton", "type": "Client", "count": "12", "last": "2026-10-06", "first": "2026-10-05"}, {"name": "Gaurav Jesrani", "email": "gaurav.jesrani@hilton.com", "org": "Hilton Garden Inn West Edmonton", "type": "Client", "count": "15", "last": "2026-10-14", "first": "2026-03-17"}, {"name": "Shirley Hannink", "email": "shirley@hiecws.com", "org": "Holiday Inn Express", "type": "Client", "count": "1", "last": "2026-03-27", "first": "2026-03-27"}, {"name": "Shirley Hannink", "email": "shannink@hiecws.com", "org": "Holiday Inn Express", "type": "Client", "count": "2", "last": "2026-05-04", "first": "2026-03-27"}, {"name": "Rishu Singh", "email": "rishu@kastelholdings.com", "org": "Kastel Holdings", "type": "Client", "count": "4", "last": "2026-10-03", "first": "2026-09-27"}, {"name": "Jeeian Panting", "email": "gmramadawc@kastelholdings.com", "org": "Kastel Holdings / Ramada Whitecourt", "type": "Client", "count": "4", "last": "2026-10-03", "first": "2026-09-27"}, {"name": "Akanshu Popli", "email": "info@poplihospitality.com", "org": "Popli Hospitality", "type": "Client", "count": "11", "last": "2026-10-03", "first": "2026-08-19"}, {"name": "Vinod Masih", "email": "vinod@sbsedmonton.com", "org": "Staybridge Suites West Edmonton", "type": "Client", "count": "4", "last": "2026-08-19", "first": "2026-08-12"}, {"name": "Mukul Aggarwal", "email": "mukul.aggarwal@sunraygroup.ca", "org": "Sunray Group", "type": "Client", "count": "9", "last": "2026-10-06", "first": "2026-10-05"}, {"name": "Talbot Arm Motel", "email": "moteltalbotarm@gmail.com", "org": "Talbot Arm Motel", "type": "Client", "count": "5", "last": "2026-05-05", "first": "2026-02-11"}, {"name": "Mvillage", "email": "mvillage@telus.net", "org": "", "type": "Other", "count": "1", "last": "2024-09-30", "first": "2024-09-30"}, {"name": "Varughese Arattu", "email": "varughesearattu@gmail.com", "org": "(personal)", "type": "Other", "count": "1", "last": "2026-07-14", "first": "2026-07-14"}, {"name": "Navneet Singh", "email": "navneet.singh@jafferinc.com", "org": "Jaffer Inc.", "type": "Other", "count": "1", "last": "2026-09-04", "first": "2026-09-04"}, {"name": "Mostafa Mansour", "email": "mostaqma@amazon.com", "org": "Amazon", "type": "Service", "count": "2", "last": "2026-09-22", "first": "2026-09-21"}, {"name": "American Express Merchant Services", "email": "americanexpress@email.americanexpress.com", "org": "American Express Merchant Services", "type": "Service", "count": "4", "last": "2026-04-30", "first": "2023-08-01"}, {"name": "Sarah Brown", "email": "sarah.brown@creditcardgateway.ca", "org": "Credit Card Gateway", "type": "Service", "count": "2", "last": "2026-10-01", "first": "2026-08-26"}, {"name": "Aayat Mir", "email": "aayat.mir@moneris.com", "org": "Moneris", "type": "Service", "count": "1", "last": "2023-10-27", "first": "2023-10-27"}, {"name": "Amber Lynn Johnston", "email": "amberlynn.johnston@moneris.com", "org": "Moneris", "type": "Service", "count": "3", "last": "2023-08-01", "first": "2023-07-26"}, {"name": "Von Ducay", "email": "von.ducay@moneris.com", "org": "Moneris", "type": "Service", "count": "65", "last": "2026-02-26", "first": "2023-07-19"}, {"name": "Barinder Bhamra", "email": "barinder@rk-cpa.ca", "org": "RK Professional Corp (accountant)", "type": "Service", "count": "22", "last": "2026-10-08", "first": "2024-12-02"}, {"name": "RK Professional Corp", "email": "info@rk-cpa.ca", "org": "RK Professional Corp (accountant)", "type": "Service", "count": "28", "last": "2026-10-02", "first": "2023-07-20"}, {"name": "Shabbir Banu", "email": "shabbir@rk-cpa.ca", "org": "RK Professional Corp (accountant)", "type": "Service", "count": "30", "last": "2026-10-08", "first": "2024-12-02"}, {"name": "Yissete Vega Beltran", "email": "yvegabeltran@yelp.com", "org": "Yelp", "type": "Service", "count": "4", "last": "2026-06-30", "first": "2026-06-22"}, {"name": "Baiying Trade", "email": "info@baiyingtrade.com", "org": "Baiying Trade", "type": "Supplier", "count": "1", "last": "2026-09-02", "first": "2026-09-02"}, {"name": "Anna Raj", "email": "annaraj@bannarimills.com", "org": "Bannari Mills", "type": "Supplier", "count": "2", "last": "2026-10-10", "first": "2026-09-12"}, {"name": "Saravanan HT", "email": "saravanan.ht@bannarimills.in", "org": "Bannari Mills", "type": "Supplier", "count": "4", "last": "2026-10-12", "first": "2026-09-11"}, {"name": "Sudipto Sen", "email": "sudipto@bannarimills.com", "org": "Bannari Mills", "type": "Supplier", "count": "3", "last": "2026-10-12", "first": "2026-09-12"}, {"name": "Merry", "email": "merry@bosharon.cn", "org": "Bosharon", "type": "Supplier", "count": "4", "last": "2026-10-14", "first": "2026-09-22"}, {"name": "B Hicks", "email": "bhicks@busy-bee.ca", "org": "Busy Bee", "type": "Supplier", "count": "4", "last": "2026-09-01", "first": "2026-08-21"}, {"name": "Jay", "email": "jay@busy-bee.ca", "org": "Busy Bee", "type": "Supplier", "count": "1", "last": "2026-09-03", "first": "2026-09-03"}, {"name": "Twila", "email": "twila@busy-bee.ca", "org": "Busy Bee", "type": "Supplier", "count": "24", "last": "2026-10-13", "first": "2026-05-20"}, {"name": "Verna", "email": "verna@busy-bee.ca", "org": "Busy Bee", "type": "Supplier", "count": "4", "last": "2026-09-29", "first": "2026-09-10"}, {"name": "Direct Textile Store", "email": "sent-with@powr.io", "org": "Direct Textile Store", "type": "Supplier", "count": "1", "last": "2026-07-15", "first": "2026-07-15"}, {"name": "Doods Carbonell", "email": "edmontonsw@fullypromoted.ca", "org": "Fully Promoted Edmonton SW", "type": "Supplier", "count": "3", "last": "2026-07-03", "first": "2026-07-02"}, {"name": "Michelle", "email": "michelle@greatboomhousewares.com", "org": "Great Boom Housewares", "type": "Supplier", "count": "1", "last": "2026-10-02", "first": "2026-10-02"}, {"name": "Guanhua Paper Sales", "email": "esales5@guanhuapaper.com", "org": "Guanhua Paper", "type": "Supplier", "count": "1", "last": "2023-07-19", "first": "2023-07-19"}, {"name": "Haplast Deputy Manager", "email": "pk.deputymanager@haplast.vn", "org": "Haplast Vietnam", "type": "Supplier", "count": "1", "last": "2024-11-20", "first": "2024-11-20"}, {"name": "Kam Khiamal", "email": "kam_khiamal@homedepot.com", "org": "Home Depot", "type": "Supplier", "count": "1", "last": "2026-06-03", "first": "2026-06-03"}, {"name": "Luis A Rico Garcia", "email": "luis_a_rico_garcia@homedepot.com", "org": "Home Depot", "type": "Supplier", "count": "3", "last": "2026-06-12", "first": "2026-06-03"}, {"name": "Mariam Hussein", "email": "mariam_hussein@homedepot.com", "org": "Home Depot", "type": "Supplier", "count": "1", "last": "2026-06-03", "first": "2026-06-03"}, {"name": "Mildred Gayla", "email": "mildred_gayla@homedepot.com", "org": "Home Depot", "type": "Supplier", "count": "1", "last": "2026-06-03", "first": "2026-06-03"}, {"name": "Home Depot Pro Desk 7248", "email": "prodesk_7248@homedepot.com", "org": "Home Depot Pro Desk", "type": "Supplier", "count": "7", "last": "2026-06-12", "first": "2026-05-29"}, {"name": "Edward Chan", "email": "edward@havaseat.com", "org": "ISA / Havaseat", "type": "Supplier", "count": "5", "last": "2026-10-13", "first": "2026-10-06"}, {"name": "ISA", "email": "isa@havaseat.com", "org": "ISA / Havaseat", "type": "Supplier", "count": "1", "last": "2026-10-06", "first": "2026-10-06"}, {"name": "Jessica Athi", "email": "reception@havaseat.com", "org": "ISA / Havaseat", "type": "Supplier", "count": "2", "last": "2026-10-06", "first": "2026-10-06"}, {"name": "Inkrite Ltd", "email": "inkrite15@gmail.com", "org": "Inkrite Ltd.", "type": "Supplier", "count": "1", "last": "2023-07-26", "first": "2023-07-26"}, {"name": "Jennifer", "email": "jennifer@nicejy.com", "org": "Jiuyang (Janitorial)", "type": "Supplier", "count": "4", "last": "2026-10-06", "first": "2026-10-02"}, {"name": "Linen Mart Sales", "email": "sales@linenmart.ca", "org": "Linen Mart", "type": "Supplier", "count": "7", "last": "2026-08-07", "first": "2026-07-22"}, {"name": "Linen Mart", "email": "contact@linenmart.ca", "org": "Linen Mart", "type": "Supplier", "count": "1", "last": "2026-07-22", "first": "2026-07-22"}, {"name": "Omland Hospitality", "email": "csr@omlandhospitality.com", "org": "Omland Hospitality", "type": "Supplier", "count": "3", "last": "2026-03-31", "first": "2026-03-26"}, {"name": "Rita", "email": "rita@paishitex.com", "org": "Paishi Tex", "type": "Supplier", "count": "1", "last": "2026-09-11", "first": "2026-09-11"}, {"name": "Sijo", "email": "sijo@primefoodclub.com", "org": "Prime Food Club", "type": "Supplier", "count": "1", "last": "2026-07-16", "first": "2026-07-16"}, {"name": "Shirin Group", "email": "gm.cn387@shirin.group", "org": "Shirin Group", "type": "Supplier", "count": "1", "last": "2026-09-21", "first": "2026-09-21"}, {"name": "Sun Linen", "email": "accsunlinen0822@gmail.com", "org": "Sun Linen", "type": "Supplier", "count": "4", "last": "2026-09-01", "first": "2026-07-28"}, {"name": "Sun Linen Customer Service", "email": "sunlinentowels@gmail.com", "org": "Sun Linen & Towels Inc.", "type": "Supplier", "count": "11", "last": "2026-08-28", "first": "2026-07-22"}, {"name": "Sachin Kumar", "email": "sachin.kumar@sunbridgeindia.ca", "org": "Sunbridge India", "type": "Supplier", "count": "10", "last": "2026-10-06", "first": "2026-10-05"}, {"name": "Farzana Batool", "email": "fbatool@winsham.com", "org": "Winsham Fabrik", "type": "Supplier", "count": "20", "last": "2024-10-31", "first": "2023-09-05"}, {"name": "Varughese Arattu", "email": "varughese@winsham.com", "org": "Winsham Fabrik", "type": "Supplier", "count": "27", "last": "2024-10-31", "first": "2023-09-01"}, {"name": "Winsham Edmonton", "email": "wsedmar@winsham.com", "org": "Winsham Fabrik", "type": "Supplier", "count": "8", "last": "2026-10-07", "first": "2026-02-17"}, {"name": "Winsham Fabrik Invoices", "email": "winshamedmontoninvoices@gmail.com", "org": "Winsham Fabrik Canada Ltd.", "type": "Supplier", "count": "14", "last": "2023-11-06", "first": "2023-09-26"}];
-const CATS=["Guest Amenities", "Housekeeping", "Room Supplies", "Bathroom", "Operations", "Furniture", "Appliances", "Bed & Bath Linens", "Towels", "Janitorial", "Hotel Slippers", "Healthcare Textiles"];
-function go(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById('p-'+id).classList.add('on');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
-function leadRow(l){return `<div class="row"><span class="nm">${l.name}</span><span class="tag ${l.type}">${l.type}</span><div class="org">${l.org}</div><div class="em">${l.email}</div><div class="org" style="margin-top:4px">${l.count} emails · ${l.first} → ${l.last}</div></div>`;}
-function renderLeads(){const q=document.getElementById('lq').value.toLowerCase();const r=LEADS.filter(l=>!q||(l.name+' '+l.org+' '+l.email).toLowerCase().includes(q));document.getElementById('leadList').innerHTML=r.map(leadRow).join('')||'<div class="empty">No matches.</div>';}
-function renderContacts(){const q=document.getElementById('cq').value.toLowerCase();const r=LEADS.filter(l=>!q||(l.name+' '+l.org+' '+l.email).toLowerCase().includes(q));document.getElementById('contactList').innerHTML=r.map(l=>`<div class="row"><span class="nm">${l.name}</span><span class="tag ${l.type}">${l.type}</span><div class="org">${l.org}</div><div class="em">${l.email}</div></div>`).join('')||'<div class="empty">No matches.</div>';}
-document.getElementById('catList').innerHTML=CATS.map(c=>`<div class="cat"><span class="n">📁 ${c}</span><span class="c">0 subcategories · 0 products</span></div>`).join('');
-document.getElementById('dashRecent').innerHTML=LEADS.slice(0,5).map(leadRow).join('');
-renderLeads();renderContacts();
+const $=id=>document.getElementById(id);
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2600);}
+async function api(method,path,body){
+  const r=await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  if(!r.ok){let d='';try{d=(await r.json()).detail||'';}catch(_){}throw new Error('Failed ('+r.status+') '+d);}
+  return r.status===204?null:r.json();
+}
+const money=n=>'$'+Number(n||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});
+function stTag(s){const c={new:'gold',contacted:'',qualified:'green',converted:'green',lost:'red',draft:'',sent:'',approved:'green',unpaid:'gold',paid:'green',overdue:'red',void:'red'};return '<span class="tag '+(c[s]||'')+'">'+esc(s)+'</span>';}
+
+/* ---------------- navigation ---------------- */
+const NAV=[
+ {g:'Overview'},{id:'dash',t:'📊 Dashboard'},
+ {g:'Catalog'},{id:'products',t:'📦 Products'},{id:'categories',t:'🗂 Categories'},{id:'suppliers',t:'🏭 Suppliers'},
+ {g:'Sales'},{id:'leads',t:'🧲 Leads'},{id:'customers',t:'🏨 Customers'},{id:'contacts',t:'👤 Contacts'},{id:'quotes',t:'📝 Quotes'},{id:'invoices',t:'🧾 Invoices'},
+ {g:'Accounting'},{id:'bills',t:'💸 Bills'},{id:'chart',t:'📚 Chart of Accounts'},{id:'tax',t:'🏛 Tax Center (GST)'},{id:'ar',t:'⏳ Aged Receivables'},{id:'ap',t:'⏳ Aged Payables'},{id:'sales',t:'💹 Sales Reports'},{id:'pl',t:'📈 Profit & Loss'},{id:'bs',t:'⚖️ Balance Sheet'},
+];
+let cur='dash';
+function renderNav(){$('nav').innerHTML=NAV.map(n=>n.g?'<div class="grp">'+n.g+'</div>':'<button data-id="'+n.id+'" class="'+(cur===n.id?'on':'')+'" onclick="go(\''+n.id+'\')">'+n.t+'</button>').join('');}
+function go(id){cur=id;renderNav();SECTIONS[id]();window.scrollTo(0,0);}
+
+/* ---------------- modal form ---------------- */
+function fldHTML(f,initial){
+  const v=initial[f.k]!=null?initial[f.k]:(f.def||'');
+  let inner='';
+  if(f.t==='select'){inner='<select id="f_'+f.k+'">'+f.opts.map(o=>'<option value="'+esc(o.v)+'"'+(String(v)===String(o.v)?' selected':'')+'>'+esc(o.l)+'</option>').join('')+'</select>';}
+  else if(f.t==='textarea'){inner='<textarea id="f_'+f.k+'">'+esc(v)+'</textarea>';}
+  else if(f.t==='check'){return '<div class="fld"><label class="chk"><input type="checkbox" id="f_'+f.k+'"'+(v?' checked':'')+'> '+esc(f.label)+'</label></div>';}
+  else{inner='<input id="f_'+f.k+'" type="'+(f.t||'text')+'" value="'+esc(v)+'"'+(f.ph?' placeholder="'+esc(f.ph)+'"':'')+'>';}
+  return '<div class="fld"><label>'+esc(f.label)+'</label>'+inner+'</div>';
+}
+function openForm(title,fields,onSave,initial){
+  initial=initial||{};
+  let h='<h3>'+esc(title)+'</h3>';
+  fields.forEach(f=>{
+    if(f.t==='row'){h+='<div class="frow">';f.items.forEach(sf=>{h+=fldHTML(sf,initial);});h+='</div>';return;}
+    h+=fldHTML(f,initial);
+  });
+  h+='<div class="fact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="savebtn">Save</button></div>';
+  $('formbox').innerHTML=h;$('modal').classList.add('open');
+  $('savebtn').onclick=async()=>{
+    const data={};
+    fields.forEach(f=>{(f.t==='row'?f.items:[f]).forEach(sf=>{
+      const el=$('f_'+sf.k);if(!el)return;
+      if(sf.t==='check')data[sf.k]=el.checked;
+      else if(el.value==='')data[sf.k]=null;
+      else data[sf.k]=sf.num?Number(el.value):el.value;
+    });});
+    try{await onSave(data);closeModal();toast('Saved ✅');SECTIONS[cur]();}
+    catch(e){toast('⚠️ '+e.message);}
+  };
+}
+function closeModal(){$('modal').classList.remove('open');}
+$('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+
+/* ---------------- table ---------------- */
+function table(cols,rows,actions){
+  if(!rows.length)return '<div class="empty">Nothing here yet — click <b>+ Add</b> to create the first one.</div>';
+  let h='<div class="tblwrap"><table><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+(actions?'<th></th>':'')+'</tr>';
+  rows.forEach(r=>{h+='<tr>'+r.cells.map(c=>'<td>'+c+'</td>').join('')+(actions?'<td style="white-space:nowrap">'+actions(r)+'</td>':'')+'</tr>';});
+  return h+'</table></div>';
+}
+const eb=id=>'<button class="btn ghost sm" onclick="openEdit(\''+id+'\')">Edit</button>';
+const db=id=>'<button class="btn danger sm" onclick="delRow(\''+id+'\')">Delete</button>';
+const DEL_PATH={products:'/api/products/',categories:'/api/categories/',suppliers:'/api/suppliers/',customers:'/api/customers/',leads:'/api/leads/',contacts:'/api/contacts/',bills:'/api/accounting/bills/'};
+let ROWS={};
+async function delRow(id){
+  if(!confirm('Delete this record?'))return;
+  try{await api('DELETE',DEL_PATH[cur]+id);toast('Deleted');SECTIONS[cur]();}
+  catch(e){toast('⚠️ '+e.message);}
+}
+
+/* ---------------- SECTIONS ---------------- */
+const SECTIONS={};
+
+SECTIONS.dash=async()=>{
+  const s=await api('GET','/api/dashboard/stats');
+  const cards=[['🧲 New leads',s.leads_new],['🏨 Customers',s.customers],['🏭 Suppliers',s.suppliers],['📦 Products',s.products],['📝 Draft quotes',s.quotes_draft],['🧾 Unpaid invoices',s.invoices_unpaid],['💰 Receivable',money(s.receivable)],['✅ Revenue (paid)',money(s.revenue_paid)]];
+  $('main').innerHTML='<div class="hd"><h2>📊 Dashboard</h2></div><div class="cards">'
+    +cards.map(x=>'<div class="stat"><div class="n">'+x[1]+'</div><div class="l">'+x[0]+'</div></div>').join('')+'</div>'
+    +'<p class="note">Live from your database — updates every time you open this page.</p>';
+};
+
+async function crudSection(title,path,cols,rowFn,fields,editFields){
+  const rows=await api('GET',path);
+  ROWS={};rows.forEach(r=>ROWS[r.id]=r);
+  $('main').innerHTML='<div class="hd"><h2>'+title+'</h2><div class="sp"></div><button class="btn" onclick="openAdd()">+ Add</button></div>'
+    +table(cols,rows.map(r=>({id:r.id,cells:rowFn(r)})),r=>eb(r.id)+' '+db(r.id));
+  window.openAdd=()=>openForm('Add '+title.split(' ').slice(1).join(' '),fields,async d=>{await api('POST',path,d);});
+  window.openEdit=id=>openForm('Edit',editFields||fields,async d=>{await api('PUT',path+'/'+id,d);},ROWS[id]);
+}
+
+let CATS=[],SUPS=[],CUSTS=[];
+async function refs(){[CATS,SUPS]=await Promise.all([api('GET','/api/categories'),api('GET','/api/suppliers')]);}
+
+const PROD_F=()=>[
+  {k:'sku',label:'SKU *',ph:'JS-65-001'},
+  {k:'name',label:'Product name *'},
+  {k:'description',label:'Description',t:'textarea'},
+  {k:'category_id',label:'Category',t:'select',opts:[{v:'',l:'— none —'}].concat(CATS.map(c=>({v:c.id,l:c.name})))},
+  {k:'supplier_id',label:'Supplier (internal)',t:'select',opts:[{v:'',l:'— none —'}].concat(SUPS.map(s=>({v:s.id,l:s.name})))},
+  {k:'unit',label:'Unit',t:'select',opts:['each','dozen','case','pack','box'].map(u=>({v:u,l:u}))},
+  {t:'row',items:[{k:'cost_price',label:'Cost (internal)',t:'number',num:1},{k:'sell_price',label:'Sell price',t:'number',num:1}]},
+  {k:'show_price',label:'Show price to customers',t:'check'},
+];
+SECTIONS.products=async()=>{
+  await refs();
+  await crudSection('📦 Products','/api/products',['SKU','Name','Category','Sell'],
+    r=>['<b>'+esc(r.sku)+'</b>',esc(r.name),esc((r.categories||{}).name||'—'),r.sell_price?money(r.sell_price):'<span class="tag">on quote</span>'],
+    PROD_F(),PROD_F());
+};
+
+SECTIONS.categories=async()=>{
+  const F=[{k:'name',label:'Name *'},{k:'slug',label:'Slug (auto if blank)',ph:'hotel-towels'},{k:'sort_order',label:'Sort order',t:'number',num:1,def:0}];
+  await crudSection('🗂 Categories','/api/categories',['Name','Slug'],
+    r=>['<b>'+esc(r.name)+'</b>','<span class="tag">'+esc(r.slug)+'</span>'],F);
+};
+
+SECTIONS.suppliers=async()=>{
+  const F=[{k:'name',label:'Supplier name *'},{k:'contact_name',label:'Contact person'},
+    {t:'row',items:[{k:'email',label:'Email'},{k:'phone',label:'Phone'}]},
+    {k:'country',label:'Country',def:'China'},{k:'notes',label:'Internal notes',t:'textarea'}];
+  await crudSection('🏭 Suppliers','/api/suppliers',['Name','Contact','Email','Phone'],
+    r=>['<b>'+esc(r.name)+'</b>',esc(r.contact_name||'—'),esc(r.email||'—'),esc(r.phone||'—')],F);
+};
+
+SECTIONS.customers=async()=>{
+  const F=[{k:'company_name',label:'Company / hotel name *'},{k:'contact_name',label:'Contact person'},
+    {t:'row',items:[{k:'email',label:'Email'},{k:'phone',label:'Phone'}]},
+    {k:'address',label:'Address',t:'textarea'},
+    {k:'customer_type',label:'Type',t:'select',opts:['hotel','restaurant','medical','other'].map(t=>({v:t,l:t}))},
+    {k:'notes',label:'Notes',t:'textarea'}];
+  await crudSection('🏨 Customers','/api/customers',['Company','Contact','Phone','Type'],
+    r=>['<b>'+esc(r.company_name)+'</b>',esc(r.contact_name||'—'),esc(r.phone||'—'),'<span class="tag">'+esc(r.customer_type)+'</span>'],F);
+};
+
+SECTIONS.leads=async()=>{
+  const rows=await api('GET','/api/leads');ROWS={};rows.forEach(r=>ROWS[r.id]=r);
+  const F=[{k:'company_name',label:'Company *'},{k:'contact_name',label:'Contact'},
+    {t:'row',items:[{k:'phone',label:'Phone'},{k:'email',label:'Email'}]},
+    {t:'row',items:[{k:'source',label:'Source',ph:'website / referral'},{k:'status',label:'Status',t:'select',opts:['new','contacted','qualified','converted','lost'].map(s=>({v:s,l:s}))}]},
+    {k:'notes',label:'Notes',t:'textarea'}];
+  $('main').innerHTML='<div class="hd"><h2>🧲 Leads</h2><div class="sp"></div><button class="btn" onclick="openAdd()">+ Add</button></div>'
+    +table(['Company','Contact','Status','Source'],rows.map(r=>({id:r.id,cells:['<b>'+esc(r.company_name)+'</b>',esc(r.contact_name||'—'),stTag(r.status),esc(r.source||'—')]})),r=>eb(r.id)+' '+db(r.id)+(ROWS[r.id].status!=='converted'?' <button class="btn sm" onclick="convertLead(\''+r.id+'\')">→ Customer</button>':''));
+  window.openAdd=()=>openForm('Add lead',F,async d=>{await api('POST','/api/leads',d);});
+  window.openEdit=id=>openForm('Edit lead',F,async d=>{await api('PUT','/api/leads/'+id,d);},ROWS[id]);
+};
+async function convertLead(id){if(!confirm('Convert this lead to a customer?'))return;try{await api('POST','/api/leads/'+id+'/convert');toast('Converted to customer ✅');SECTIONS.leads();}catch(e){toast('⚠️ '+e.message);}}
+
+SECTIONS.contacts=async()=>{
+  const rows=await api('GET','/api/contacts');ROWS={};rows.forEach(r=>ROWS[r.id]=r);
+  const F=[{k:'full_name',label:'Full name *'},{k:'role',label:'Role / title'},
+    {t:'row',items:[{k:'phone',label:'Phone'},{k:'email',label:'Email'}]},{k:'notes',label:'Notes',t:'textarea'}];
+  $('main').innerHTML='<div class="hd"><h2>👤 Contacts</h2><div class="sp"></div><button class="btn" onclick="openAdd()">+ Add</button></div>'
+    +table(['Name','Role','Phone','Email'],rows.map(r=>({id:r.id,cells:['<b>'+esc(r.full_name)+'</b>',esc(r.role||'—'),esc(r.phone||'—'),esc(r.email||'—')]})),r=>eb(r.id)+' '+db(r.id));
+  window.openAdd=()=>openForm('Add contact',F,async d=>{if(!d.customer_id&&!d.lead_id)throw new Error('Attach to a customer or lead first (coming soon)');await api('POST','/api/contacts',d);});
+  window.openEdit=id=>openForm('Edit contact',F,async d=>{await api('PUT','/api/contacts/'+id,d);},ROWS[id]);
+};
+
+SECTIONS.quotes=async()=>{
+  const rows=await api('GET','/api/quotes');ROWS={};rows.forEach(r=>ROWS[r.id]=r);
+  $('main').innerHTML='<div class="hd"><h2>📝 Quotes</h2><div class="sp"></div><button class="btn" onclick="newQuote()">+ New Quote</button></div>'
+    +table(['Number','Customer','Total','Status'],rows.map(r=>({id:r.id,cells:['<b>'+esc(r.quote_number)+'</b>',esc((r.customers||{}).company_name||'—'),money(r.total),stTag(r.status)]})),r=>'<button class="btn ghost sm" onclick="viewQuote(\''+r.id+'\')">View</button>');
+};
+async function newQuote(){
+  CUSTS=await api('GET','/api/customers');
+  if(!CUSTS.length){toast('Add a customer first');return;}
+  docForm('New quote','/api/quotes','quote');
+}
+function docForm(title,path,kind){
+  let h='<h3>'+title+'</h3><div class="fld"><label>Customer *</label><select id="q_cust">'+CUSTS.map(c=>'<option value="'+c.id+'">'+esc(c.company_name)+'</option>').join('')+'</select></div>';
+  h+='<div class="fld"><label>Line items</label><div class="items" id="q_items"></div><button class="btn ghost sm" type="button" onclick="addQRow()">+ Add line</button></div>';
+  h+='<div class="fld"><label>Note for customer</label><textarea id="q_note"></textarea></div>';
+  h+='<div class="fact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="savebtn">Create</button></div>';
+  $('formbox').innerHTML=h;$('modal').classList.add('open');addQRow();
+  $('savebtn').onclick=async()=>{
+    const items=[...document.querySelectorAll('#q_items .irow')].map(r=>({description:r.querySelector('.d').value,quantity:Number(r.querySelector('.q').value)||1,unit_price:Number(r.querySelector('.p').value)||0})).filter(i=>i.description);
+    if(!items.length){toast('Add at least one line item');return;}
+    try{const d=await api('POST',path,{customer_id:$('q_cust').value,customer_note:$('q_note').value,items});closeModal();toast((kind==='quote'?'Quote ':'Invoice ')+(d.quote_number||d.invoice_number)+' created ✅');SECTIONS[cur]();}
+    catch(e){toast('⚠️ '+e.message);}
+  };
+}
+function addQRow(){const d=document.createElement('div');d.className='irow';d.innerHTML='<input class="d" placeholder="Description"><input class="q" type="number" placeholder="Qty" value="1"><input class="p" type="number" placeholder="Price" step="0.01">';$('q_items').appendChild(d);}
+async function viewQuote(id){
+  const q=await api('GET','/api/quotes/'+id);
+  let h='<h3>'+esc(q.quote_number)+' '+stTag(q.status)+'</h3><p class="note" style="margin-bottom:10px"><b>'+esc((q.customers||{}).company_name||'')+'</b> · Total: <b>'+money(q.total)+'</b> (incl. '+money(q.gst)+' GST)</p>';
+  h+='<div class="tblwrap"><table><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>'+(q.items||[]).map(i=>'<tr><td>'+esc(i.description)+'</td><td>'+i.quantity+'</td><td>'+money(i.unit_price)+'</td><td>'+money(i.line_total)+'</td></tr>').join('')+'</table></div>';
+  h+='<div class="fact"><button class="btn ghost" onclick="closeModal()">Close</button>'+(q.status==='draft'?'<button class="btn" onclick="markQuote(\''+id+'\',\'sent\')">Mark sent</button>':'')+'</div>';
+  $('formbox').innerHTML=h;$('modal').classList.add('open');
+}
+async function markQuote(id,s){await api('PUT','/api/quotes/'+id+'/status?status='+s);closeModal();SECTIONS.quotes();}
+
+SECTIONS.invoices=async()=>{
+  const rows=await api('GET','/api/invoices');ROWS={};rows.forEach(r=>ROWS[r.id]=r);
+  $('main').innerHTML='<div class="hd"><h2>🧾 Invoices</h2><div class="sp"></div><button class="btn" onclick="newInvoice()">+ New Invoice</button></div>'
+    +table(['Number','Customer','Total','Balance','Status'],rows.map(r=>({id:r.id,cells:['<b>'+esc(r.invoice_number)+'</b>',esc((r.customers||{}).company_name||'—'),money(r.total),money(r.balance_due),stTag(r.status)]})),r=>'<button class="btn ghost sm" onclick="viewInvoice(\''+r.id+'\')">View</button>');
+};
+async function newInvoice(){
+  CUSTS=await api('GET','/api/customers');
+  if(!CUSTS.length){toast('Add a customer first');return;}
+  docForm('New invoice','/api/invoices','invoice');
+}
+async function viewInvoice(id){
+  const inv=await api('GET','/api/invoices/'+id);
+  let h='<h3>'+esc(inv.invoice_number)+' '+stTag(inv.status)+'</h3><p class="note" style="margin-bottom:10px"><b>'+esc((inv.customers||{}).company_name||'')+'</b> · Total: <b>'+money(inv.total)+'</b> · Balance: <b>'+money(inv.balance_due)+'</b></p>';
+  h+='<div class="tblwrap" style="margin-bottom:12px"><table><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>'+(inv.items||[]).map(i=>'<tr><td>'+esc(i.description)+'</td><td>'+i.quantity+'</td><td>'+money(i.unit_price)+'</td><td>'+money(i.line_total)+'</td></tr>').join('')+'</table></div>';
+  if((inv.payments||[]).length)h+='<p class="note" style="margin-bottom:8px"><b>Payments:</b> '+inv.payments.map(p=>money(p.amount)+' ('+esc(p.method||'')+')').join(', ')+'</p>';
+  h+='<div class="fact"><button class="btn ghost" onclick="closeModal()">Close</button>'+(Number(inv.balance_due)>0?'<button class="btn" onclick="payInvoice(\''+id+'\')">Record payment</button>':'')+'</div>';
+  $('formbox').innerHTML=h;$('modal').classList.add('open');
+}
+async function payInvoice(id){
+  openForm('Record payment',[{k:'amount',label:'Amount *',t:'number',num:1},{k:'method',label:'Method',t:'select',opts:['e-transfer','cheque','cash','card'].map(m=>({v:m,l:m}))},{k:'reference',label:'Reference'}],
+    async d=>{await api('POST','/api/invoices/'+id+'/payments',{amount:Number(d.amount),method:d.method,reference:d.reference});viewInvoice(id);});
+}
+
+SECTIONS.bills=async()=>{
+  const [rows,CH]=await Promise.all([api('GET','/api/accounting/bills'),api('GET','/api/accounting/chart')]);
+  ROWS={};rows.forEach(r=>ROWS[r.id]=r);
+  const expOpts=CH.filter(c=>c.type==='expense').map(c=>({v:c.code,l:c.code+' — '+c.name}));
+  const F=[{k:'supplier_id',label:'Supplier',t:'select',opts:[{v:'',l:'— none —'}].concat(SUPS.map(s=>({v:s.id,l:s.name})))},
+    {k:'subtotal',label:'Amount (before GST) *',t:'number',num:1},
+    {k:'account_code',label:'Expense account',t:'select',opts:expOpts},
+    {k:'notes',label:'Notes',t:'textarea'}];
+  $('main').innerHTML='<div class="hd"><h2>💸 Bills (vendor)</h2><div class="sp"></div><button class="btn" onclick="openAdd()">+ Add bill</button></div>'
+    +table(['Number','Supplier','Total','Balance','Status'],rows.map(r=>({id:r.id,cells:['<b>'+esc(r.bill_number)+'</b>',esc((r.suppliers||{}).name||'—'),money(r.total),money(r.balance_due),stTag(r.status)]})),r=>db(r.id)+(ROWS[r.id].status==='unpaid'?' <button class="btn sm" onclick="payBill(\''+r.id+'\')">Mark paid</button>':''));
+  window.openAdd=()=>openForm('Add bill',F,async d=>{d.subtotal=Number(d.subtotal)||0;await api('POST','/api/accounting/bills',d);});
+  window.openEdit=()=>toast('Bills are final — delete and re-enter to correct');
+  window.payBill=async id=>{if(!confirm('Mark this bill paid?'))return;await api('PUT','/api/accounting/bills/'+id+'/pay');SECTIONS.bills();};
+};
+
+SECTIONS.chart=async()=>{
+  const rows=await api('GET','/api/accounting/chart');
+  $('main').innerHTML='<div class="hd"><h2>📚 Chart of Accounts</h2><div class="sp"></div><button class="btn" onclick="newAcct()">+ Add account</button></div>'
+    +table(['Code','Name','Type','Subtype'],rows.map(r=>({cells:['<b>'+esc(r.code)+'</b>',esc(r.name),'<span class="tag">'+esc(r.type)+'</span>',esc(r.subtype||'—')]})));
+  window.newAcct=()=>openForm('Add account',[
+    {k:'code',label:'Code *',ph:'5500'},{k:'name',label:'Name *'},
+    {k:'type',label:'Type',t:'select',opts:['asset','liability','equity','income','expense'].map(t=>({v:t,l:t}))},
+    {k:'subtype',label:'Subtype'}],
+    async d=>{await api('POST','/api/accounting/chart',d);});
+};
+
+SECTIONS.pl=async()=>{
+  const r=await api('GET','/api/accounting/reports/profit-loss');
+  $('main').innerHTML='<div class="hd"><h2>📈 Profit & Loss</h2></div><div class="rep"><h3>Income</h3>'
+    +table(['Account','Amount'],r.income_lines.map(l=>({cells:[esc(l.account),money(l.amount)]})))
+    +'<h3 style="margin-top:14px">Expenses</h3>'
+    +(r.expense_lines.length?table(['Account','Amount'],r.expense_lines.map(l=>({cells:[esc(l.account),money(l.amount)]}))):'<p class="note">No expenses recorded yet.</p>')
+    +'<table style="margin-top:12px"><tr class="tot"><td>Net profit</td><td style="text-align:right">'+money(r.net_profit)+'</td></tr></table></div>'
+    +'<p class="note">Income from invoices · expenses from vendor bills — your QuickBooks-style books.</p>';
+};
+
+SECTIONS.bs=async()=>{
+  const r=await api('GET','/api/accounting/reports/balance-sheet');
+  $('main').innerHTML='<div class="hd"><h2>⚖️ Balance Sheet</h2></div><div class="rep"><h3>Assets</h3>'
+    +table(['Account','Amount'],r.assets.map(l=>({cells:[esc(l.account),money(l.amount)]})))
+    +'<table><tr class="tot"><td>Total assets</td><td style="text-align:right">'+money(r.assets_total)+'</td></tr></table>'
+    +'<h3 style="margin-top:14px">Liabilities</h3>'
+    +table(['Account','Amount'],r.liabilities.map(l=>({cells:[esc(l.account),money(l.amount)]})))
+    +'<table><tr class="tot"><td>Total liabilities</td><td style="text-align:right">'+money(r.liabilities_total)+'</td></tr></table></div>';
+};
+
+/* ---- Tax Center ---- */
+SECTIONS.tax=async()=>{
+  const r=await api('GET','/api/accounting/tax/gst');
+  const owe=r.net_owing>0, refund=r.net_owing<0;
+  $('main').innerHTML='<div class="hd"><h2>🏛 Tax Center — GST/HST</h2></div>'
+    +'<div class="cards">'
+    +'<div class="stat"><div class="n">'+money(r.gst_collected)+'</div><div class="l">GST collected (sales)</div></div>'
+    +'<div class="stat"><div class="n">'+money(r.gst_paid_itc)+'</div><div class="l">GST paid (input credits)</div></div>'
+    +'<div class="stat"><div class="n" style="color:'+(owe?'#c0392b':(refund?'#1e7e34':'inherit'))+'">'+money(Math.abs(r.net_owing))+'</div><div class="l">'+esc(r.position)+'</div></div>'
+    +'</div><div class="rep"><h3>How this works</h3><p class="note">GST you charge customers minus GST you paid suppliers = what you owe CRA (or your refund). '+esc(r.note)+'</p></div>';
+};
+
+/* ---- Aged Receivables / Payables ---- */
+function agingHTML(title,rep,nameCol){
+  let h='<div class="hd"><h2>'+title+'</h2><div class="sp"></div><div class="stat" style="min-width:180px"><div class="n">'+money(rep.total)+'</div><div class="l">Total outstanding</div></div></div>';
+  rep.buckets.forEach(b=>{
+    h+='<div class="rep"><h3>'+b.bucket+' <span class="tag '+(b.bucket==='90+'?'red':(b.bucket==='Current'?'green':'gold'))+'">'+b.count+' · '+money(b.total)+'</span></h3>';
+    h+=b.items.length?table([nameCol,'Number','Due','Days late','Balance'],b.items.map(i=>({cells:['<b>'+esc(i.name)+'</b>',esc(i.number),esc(i.due),i.days_overdue,money(i.balance)]}))):'<p class="note">None in this bucket.</p>';
+    h+='</div>';
+  });
+  return h;
+}
+SECTIONS.ar=async()=>{$('main').innerHTML=agingHTML('⏳ Aged Receivables — who owes YOU',await api('GET','/api/accounting/reports/aged-receivables'),'Customer');};
+SECTIONS.ap=async()=>{$('main').innerHTML=agingHTML('⏳ Aged Payables — who YOU owe',await api('GET','/api/accounting/reports/aged-payables'),'Supplier');};
+
+/* ---- Sales reports + Customer statements ---- */
+SECTIONS.sales=async()=>{
+  const [sbc,cf]=await Promise.all([api('GET','/api/accounting/reports/sales-by-customer'),api('GET','/api/accounting/reports/cash-flow')]);
+  CUSTS=await api('GET','/api/customers');
+  let h='<div class="hd"><h2>💹 Sales Reports</h2></div><div class="cards">'
+    +'<div class="stat"><div class="n">'+money(cf.in)+'</div><div class="l">Cash in</div></div>'
+    +'<div class="stat"><div class="n">'+money(cf.out)+'</div><div class="l">Cash out</div></div>'
+    +'<div class="stat"><div class="n">'+money(cf.net)+'</div><div class="l">Net cash flow</div></div></div>';
+  h+='<div class="rep"><h3>Sales by customer</h3>'+(sbc.customers.length?table(['Customer','Total'],sbc.customers.map(c=>({cells:['<b>'+esc(c.name)+'</b>',money(c.total)]})))+'<table><tr class="tot"><td>Grand total</td><td style="text-align:right">'+money(sbc.grand_total)+'</td></tr></table>':'<p class="note">No invoices yet.</p>')+'</div>';
+  h+='<div class="rep"><h3>Customer statement</h3><div class="fld"><label>Pick a customer</label><select id="st_cust">'+CUSTS.map(c=>'<option value="'+c.id+'">'+esc(c.company_name)+'</option>').join('')+'</select></div><button class="btn" onclick="showStmt()">View statement</button><div id="stmt_out" style="margin-top:12px"></div></div>';
+  $('main').innerHTML=h;
+  window.showStmt=async()=>{
+    const st=await api('GET','/api/accounting/customers/'+$('st_cust').value+'/statement');
+    let s='<div class="cards"><div class="stat"><div class="n">'+money(st.total_billed)+'</div><div class="l">Total billed</div></div><div class="stat"><div class="n">'+money(st.total_paid)+'</div><div class="l">Total paid</div></div><div class="stat"><div class="n">'+money(st.balance_due)+'</div><div class="l">Balance due</div></div></div>';
+    s+=table(['Invoice','Date','Total','Paid','Balance','Status'],st.invoices.map(i=>({cells:['<b>'+esc(i.number)+'</b>',esc(i.date),money(i.total),money(i.total-i.balance),money(i.balance),stTag(i.status)]})));
+    $('stmt_out').innerHTML=s;
+  };
+};
+
+renderNav();SECTIONS.dash();
 </script></body></html>
