@@ -78,6 +78,9 @@ const NAV=[
  {g:'Catalog'},{id:'products',t:'📦 Products'},{id:'categories',t:'🗂 Categories'},{id:'suppliers',t:'🏭 Suppliers'},
  {g:'Sales'},{id:'leads',t:'🧲 Leads'},{id:'customers',t:'🏨 Customers'},{id:'contacts',t:'👤 Contacts'},{id:'quotes',t:'📝 Quotes'},{id:'invoices',t:'🧾 Invoices'},
  {g:'Accounting'},{id:'bills',t:'💸 Bills'},{id:'chart',t:'📚 Chart of Accounts'},{id:'tax',t:'🏛 Tax Center (GST)'},{id:'ar',t:'⏳ Aged Receivables'},{id:'ap',t:'⏳ Aged Payables'},{id:'sales',t:'💹 Sales Reports'},{id:'pl',t:'📈 Profit & Loss'},{id:'bs',t:'⚖️ Balance Sheet'},
+ {g:'Compliance'},{id:'compliance',t:'🏛 Compliance Desk'},
+ {g:'Point of Sale'},{id:'pos',t:'🧾 POS Sale'},
+ {g:'Intake'},{id:'intake',t:'📥 Email Intake'},
 ];
 let cur='dash';
 function renderNav(){$('nav').innerHTML=NAV.map(n=>n.g?'<div class="grp">'+n.g+'</div>':'<button data-id="'+n.id+'" class="'+(cur===n.id?'on':'')+'" onclick="go(\''+n.id+'\')">'+n.t+'</button>').join('');}
@@ -366,6 +369,73 @@ SECTIONS.sales=async()=>{
     $('stmt_out').innerHTML=s;
   };
 };
+
+/* ---- Compliance Desk ---- */
+SECTIONS.compliance=async()=>{
+  const [dl,ws,cl]=await Promise.all([
+    api('GET','/api/compliance/deadlines'),
+    api('GET','/api/compliance/gst-worksheet'),
+    api('GET','/api/compliance/rk-checklist')]);
+  let h='<div class="hd"><h2>🏛 Compliance Desk</h2></div>';
+  h+='<div class="rep"><h3>Filing deadlines</h3>'+table(['Filing','Due','Days left','Authority'],dl.map(d=>({cells:['<b>'+esc(d.title)+'</b><br><span class="note">'+esc(d.detail)+'</span>',esc(d.due),'<span class="tag '+(d.urgency==='overdue'?'red':(d.urgency==='soon'?'gold':'green'))+'">'+d.days_left+' days</span>',esc(d.authority)]})))+'</div>';
+  h+='<div class="rep"><h3>GST worksheet '+ws.year+' — for '+esc(ws.prepared_for)+'</h3><div class="cards">'
+    +'<div class="stat"><div class="n">'+money(ws.gst_collected)+'</div><div class="l">GST collected</div></div>'
+    +'<div class="stat"><div class="n">'+money(ws.gst_paid_itc)+'</div><div class="l">Input credits</div></div>'
+    +'<div class="stat"><div class="n">'+money(ws.net_owing)+'</div><div class="l">'+esc(ws.position)+'</div></div></div>'
+    +'<p class="note">'+esc(ws.note)+'</p></div>';
+  h+='<div class="rep"><h3>RK checklist — '+esc(cl.accountant)+'</h3>'+table(['Document','Ready'],cl.items.map(i=>({cells:[esc(i.item),i.done?'<span class="tag green">✓ ready</span>':'<span class="tag gold">pending</span>']})))+'</div>';
+  $('main').innerHTML=h;
+};
+
+/* ---- POS ---- */
+let POS_CART=[];
+SECTIONS.pos=async()=>{
+  const t=await api('GET','/api/pos/today');
+  POS_CART=[];
+  $('main').innerHTML='<div class="hd"><h2>🧾 POS — New Sale</h2><div class="sp"></div><div class="stat" style="min-width:170px"><div class="n">'+money(t.total)+'</div><div class="l">Today · '+t.sales+' sales</div></div></div>'
+  +'<div class="rep"><h3>1. Find product</h3><div class="frow"><div class="fld" style="flex:2"><input id="pos_q" placeholder="Type name or SKU…" oninput="posSearch()"></div></div><div id="pos_results"></div></div>'
+  +'<div class="rep"><h3>2. Cart</h3><div id="pos_cart"><p class="note">Cart is empty.</p></div></div>'
+  +'<div class="rep"><h3>3. Payment</h3><div class="frow"><div class="fld"><label>Method</label><select id="pos_pay"><option value="cash">Cash</option><option value="card">Card</option><option value="e_transfer">E-transfer</option><option value="cheque">Cheque</option></select></div><div class="fld"><label>Reference (optional)</label><input id="pos_ref"></div></div>'
+  +'<button class="btn" onclick="posCheckout()" style="width:100%;padding:14px;font-size:16px;margin-top:8px">Complete Sale</button></div>'
+  +'<div id="pos_receipt"></div>';
+  window.posSearch=async()=>{
+    const q=$('pos_q').value.trim();if(q.length<2){$('pos_results').innerHTML='';return;}
+    const r=await api('GET','/api/products?q='+encodeURIComponent(q));
+    $('pos_results').innerHTML=r.slice(0,8).map(p=>'<div class="irow" style="align-items:center"><div class="d"><b>'+esc(p.name)+'</b><br><span class="note">'+esc(p.sku)+(p.sell_price?' · '+money(p.sell_price):'')+'</span></div><button class="btn sm" onclick=\'posAdd("'+p.id+'")\'>Add</button></div>').join('')||'<p class="note">No match.</p>';
+    window._posCache={};r.forEach(p=>window._posCache[p.id]=p);
+  };
+  window.posAdd=id=>{
+    const p=window._posCache[id];const ex=POS_CART.find(i=>i.product_id===id);
+    if(ex)ex.quantity++;else POS_CART.push({product_id:id,description:p.name,quantity:1,unit_price:Number(p.sell_price)||0});
+    posCartDraw();
+  };
+  window.posCartDraw=()=>{
+    if(!POS_CART.length){$('pos_cart').innerHTML='<p class="note">Cart is empty.</p>';return;}
+    const st=POS_CART.reduce((a,i)=>a+i.quantity*i.unit_price,0);
+    $('pos_cart').innerHTML=table(['Item','Qty','Price','Total'],POS_CART.map((i,x)=>({cells:[esc(i.description),'<input type="number" value="'+i.quantity+'" min="1" style="width:60px;padding:4px" onchange="POS_CART['+x+'].quantity=Number(this.value);posCartDraw()">',money(i.unit_price),money(i.quantity*i.unit_price)]})))
+    +'<table><tr><td>Subtotal</td><td style="text-align:right">'+money(st)+'</td></tr><tr><td>GST (5%)</td><td style="text-align:right">'+money(st*0.05)+'</td></tr><tr class="tot"><td><b>Total</b></td><td style="text-align:right"><b>'+money(st*1.05)+'</b></td></tr></table>';
+  };
+  window.posCheckout=async()=>{
+    if(!POS_CART.length){toast('Cart is empty');return;}
+    try{
+      const r=await api('POST','/api/pos/sale',{items:POS_CART,payment_method:$('pos_pay').value,reference:$('pos_ref').value||null});
+      $('pos_receipt').innerHTML='<div class="rep" style="border:2px solid var(--gold)"><h3>✅ Sale complete</h3><p>Order <b>'+r.order_number+'</b> · Invoice <b>'+r.invoice_number+'</b></p><p style="font-size:20px;margin:8px 0"><b>'+money(r.total)+'</b> via '+esc(r.payment_method)+'</p><button class="btn ghost" onclick="SECTIONS.pos()">New sale</button></div>';
+      POS_CART=[];$('pos_cart').innerHTML='<p class="note">Cart is empty.</p>';window.scrollTo(0,document.body.scrollHeight);
+    }catch(e){toast('⚠️ '+e.message);}
+  };
+};
+
+/* ---- Email Intake ---- */
+SECTIONS.intake=async()=>{
+  const rows=(await api('GET','/api/leads')).filter(l=>(l.source||'').indexOf('email')===0);
+  ROWS={};rows.forEach(r=>ROWS[r.id]=r);
+  $('main').innerHTML='<div class="hd"><h2>📥 Email Intake</h2></div>'
+  +'<p class="note" style="margin-bottom:14px">RFQs pulled automatically from <b>jupitersupplyltd@gmail.com</b> and <b>sales@jupitersupply.ca</b> every morning. Review and convert the real ones — delete the junk.</p>'
+  +table(['From','Subject / details','Date','Status'],rows.map(r=>({id:r.id,cells:['<b>'+esc(r.company_name)+'</b><br><span class="note">'+esc(r.contact_name||'')+'</span>',esc((r.notes||'').slice(0,120)),esc(str(r.created_at).slice(0,10)),stTag(r.status)]})),r=>eb(r.id)+' '+db(r.id)+(ROWS[r.id].status!=='converted'?' <button class="btn sm" onclick="convertLead(\''+r.id+'\')">→ Customer</button>':''));
+  window.openAdd=()=>toast('Intake leads come from email scan');
+  window.openEdit=id=>openForm('Edit intake lead',[{k:'company_name',label:'Company *'},{k:'contact_name',label:'Contact'},{t:'row',items:[{k:'phone',label:'Phone'},{k:'email',label:'Email'}]},{k:'status',label:'Status',t:'select',opts:['new','contacted','qualified','converted','lost'].map(s=>({v:s,l:s}))},{k:'notes',label:'Notes',t:'textarea'}],async d=>{await api('PUT','/api/leads/'+id,d);},ROWS[id]);
+};
+function str(s){return String(s==null?'':s);}
 
 renderNav();SECTIONS.dash();
 </script></body></html>

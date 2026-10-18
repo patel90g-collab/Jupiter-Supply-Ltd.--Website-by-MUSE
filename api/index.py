@@ -19,6 +19,8 @@ from deps import get_settings, get_supabase, log_activity, require_approval
 from routers.search import router as search_router
 from routers.crud import router as crud_router
 from routers.accounting import router as accounting_router
+from routers.compliance import router as compliance_router
+from routers.pos import router as pos_router
 
 app = FastAPI(
     title="Jupiter Supply — AI Product Search Engine",
@@ -62,6 +64,8 @@ async def crm_preview():
 app.include_router(search_router)
 app.include_router(crud_router)
 app.include_router(accounting_router)
+app.include_router(compliance_router)
+app.include_router(pos_router)
 
 
 @app.get("/health")
