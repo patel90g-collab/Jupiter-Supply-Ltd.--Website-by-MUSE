@@ -22,6 +22,7 @@ from routers.accounting import router as accounting_router
 from routers.compliance import router as compliance_router
 from routers.pos import router as pos_router
 from routers.auth import router as auth_router
+from routers.voice import router as voice_router
 
 app = FastAPI(
     title="Jupiter Supply — AI Product Search Engine",
@@ -68,6 +69,7 @@ app.include_router(accounting_router)
 app.include_router(compliance_router)
 app.include_router(pos_router)
 app.include_router(auth_router)
+app.include_router(voice_router)
 
 
 @app.get("/health")

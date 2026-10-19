@@ -110,6 +110,7 @@ const NAV=[
  {g:'Compliance'},{id:'compliance',t:'🏛 Compliance Desk'},
  {g:'Point of Sale'},{id:'pos',t:'🧾 POS Sale'},
  {g:'Intake'},{id:'intake',t:'📥 Email Intake'},
+ {g:'Voice'},{id:'voice',t:'📞 Call Log'},
 ];
 let cur='dash';
 function renderNav(){$('nav').innerHTML=NAV.map(n=>n.g?'<div class="grp">'+n.g+'</div>':'<button data-id="'+n.id+'" class="'+(cur===n.id?'on':'')+'" onclick="go(\''+n.id+'\')">'+n.t+'</button>').join('');}
@@ -464,6 +465,14 @@ SECTIONS.intake=async()=>{
   window.openAdd=()=>toast('Intake leads come from email scan');
   window.openEdit=id=>openForm('Edit intake lead',[{k:'company_name',label:'Company *'},{k:'contact_name',label:'Contact'},{t:'row',items:[{k:'phone',label:'Phone'},{k:'email',label:'Email'}]},{k:'status',label:'Status',t:'select',opts:['new','contacted','qualified','converted','lost'].map(s=>({v:s,l:s}))},{k:'notes',label:'Notes',t:'textarea'}],async d=>{await api('PUT','/api/leads/'+id,d);},ROWS[id]);
 };
+/* ---- Voice Call Log ---- */
+SECTIONS.voice=async()=>{
+  const rows=await api('GET','/api/voice/calls');
+  $('main').innerHTML='<div class="hd"><h2>📞 Call Log</h2></div>'
+  +'<p class="note" style="margin-bottom:14px">Every inbound call handled by the voice agent. Statuses: <b>Twilio number not yet connected</b> — webhook: <span class="tag">POST /api/voice/incoming</span></p>'
+  +table(['Time','From','Intent','Details'],rows.map(r=>{const d=r.details||{};return{cells:[esc(str(r.created_at).slice(0,16).replace('T',' ')),esc(d.from||'—'),stTag((r.action||'').replace('voice.','')),esc((d.speech||'')+' → '+(d.action||''))]};}));
+};
+
 function str(s){return String(s==null?'':s);}
 
 // ---- init: require login first ----
