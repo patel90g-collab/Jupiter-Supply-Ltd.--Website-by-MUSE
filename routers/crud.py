@@ -10,13 +10,14 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from supabase import Client
 
 from deps import get_supabase
+from routers.auth import get_current_user
 
-router = APIRouter(prefix="/api", tags=["dashboard-crud"])
+router = APIRouter(prefix="/api", tags=["dashboard-crud"], dependencies=[Depends(get_current_user)])
 
 
 # ---------------------------------------------------------------------------

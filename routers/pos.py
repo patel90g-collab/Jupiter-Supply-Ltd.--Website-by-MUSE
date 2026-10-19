@@ -8,14 +8,15 @@ from __future__ import annotations
 
 from datetime import date
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Depends
 from pydantic import BaseModel
 from supabase import Client
 
 from deps import get_supabase
+from routers.auth import get_current_user
 from routers.crud import _one_or_404, _next_number
 
-router = APIRouter(prefix="/api/pos", tags=["pos"])
+router = APIRouter(prefix="/api/pos", tags=["pos"], dependencies=[Depends(get_current_user)])
 
 
 class POSItem(BaseModel):

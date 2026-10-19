@@ -53,19 +53,48 @@ tr:hover td{background:#fafcff}
 .note{color:var(--mut);font-size:13px;margin-top:8px}
 @media(max-width:760px){.side{width:60px}.side button{font-size:0}.side button::first-letter{font-size:14px}.side .grp{display:none}.main{padding:14px}}
 </style></head><body>
-<div class="top"><div class="logo">🪐 JUPITER <span>SUPPLY</span></div><div class="badge">MASTER DASHBOARD</div><div class="sp"></div><a href="/crm">CRM</a><a href="/">Search</a><a href="/docs">API</a></div>
+<div class="top"><div class="logo">🪐 JUPITER <span>SUPPLY</span></div><div class="badge">MASTER DASHBOARD</div><div class="sp"></div><span id="userbox" style="font-size:13px;color:#9db2d8"></span><a href="/crm">CRM</a><a href="/">Search</a><a href="/docs">API</a></div>
 <div class="layout">
 <div class="side" id="nav"></div>
 <div class="main" id="main"><div class="empty">Loading…</div></div>
 </div>
 <div class="modal" id="modal"><div class="form" id="formbox"></div></div>
+<div class="modal open" id="loginModal" style="background:var(--navy)"><div class="form" style="max-width:380px;text-align:center">
+<div style="font-size:40px;margin-bottom:8px">🪐</div><h3>Jupiter Supply</h3>
+<p class="note" style="margin-bottom:16px">Master Dashboard — sign in</p>
+<div class="fld" style="text-align:left"><label>Email</label><input id="li_email" type="email" placeholder="you@company.com"></div>
+<div class="fld" style="text-align:left"><label>Password</label><input id="li_pass" type="password" placeholder="••••••••"></div>
+<div id="li_err" style="color:#c0392b;font-size:13px;min-height:20px;margin-bottom:8px"></div>
+<button class="btn" style="width:100%" onclick="doLogin()">Sign in</button>
+</div></div>
 <div class="toast" id="toast"></div>
 <script>
 const $=id=>document.getElementById(id);
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2600);}
+// ---- auth ----
+const TOKEN_KEY='jup_admin_token';
+function token(){return sessionStorage.getItem(TOKEN_KEY);}
+function setToken(t){if(t)sessionStorage.setItem(TOKEN_KEY,t);else sessionStorage.removeItem(TOKEN_KEY);}
+async function doLogin(){
+  const e=$('li_email').value.trim(),p=$('li_pass').value;
+  $('li_err').textContent='';
+  try{
+    const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,password:p})});
+    const j=await r.json();
+    if(!r.ok)throw new Error(j.detail||'Login failed');
+    setToken(j.access_token);
+    $('loginModal').classList.remove('open');
+    setUser(j.user);renderNav();SECTIONS.dash();
+  }catch(err){$('li_err').textContent='⚠️ '+err.message;}
+}
+  }catch(err){$('li_err').textContent='⚠️ '+err.message;}
+}
+function doLogout(){setToken(null);location.reload();}
+function setUser(u){const el=$('userbox');if(el)el.innerHTML=esc(u.full_name||u.email)+' <a href="#" onclick="changePw();return false" style="color:#9db2d8">password</a> · <a href="#" onclick="doLogout();return false" style="color:#9db2d8">logout</a>';}
 async function api(method,path,body){
-  const r=await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  const r=await fetch(path,{method,headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token()||'')},body:body?JSON.stringify(body):undefined});
+  if(r.status===401){setToken(null);$('loginModal').classList.add('open');throw new Error('Session expired — please sign in');}
   if(!r.ok){let d='';try{d=(await r.json()).detail||'';}catch(_){}throw new Error('Failed ('+r.status+') '+d);}
   return r.status===204?null:r.json();
 }
@@ -437,5 +466,26 @@ SECTIONS.intake=async()=>{
 };
 function str(s){return String(s==null?'':s);}
 
-renderNav();SECTIONS.dash();
+// ---- init: require login first ----
+(function init(){
+  renderNav();
+  if(token()){
+    api('GET','/api/auth/me').then(me=>{
+      $('loginModal').classList.remove('open');
+      setUser(me);SECTIONS.dash();
+    }).catch(()=>{
+      $('main').innerHTML='<div class="empty">Please sign in to continue.</div>';
+    });
+    return;
+  }
+  $('main').innerHTML='<div class="empty">Please sign in to continue.</div>';
+})();
+function changePw(){
+  openForm('Change password',[{k:'new_password',label:'New password (min 8 chars)'}],
+    async d=>{
+      const r=await fetch('/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token()||'')},body:JSON.stringify({new_password:d.new_password})});
+      if(!r.ok)throw new Error((await r.json()).detail||'Failed');
+      toast('Password changed ✅');
+    },{});
+}
 </script></body></html>

@@ -8,12 +8,13 @@ from __future__ import annotations
 
 from datetime import date
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Depends
 from supabase import Client
 
 from deps import get_supabase
+from routers.auth import get_current_user
 
-router = APIRouter(prefix="/api/compliance", tags=["compliance"])
+router = APIRouter(prefix="/api/compliance", tags=["compliance"], dependencies=[Depends(get_current_user)])
 
 # Verified from CRA filings & registry records (2026-10-17)
 DEADLINES = [
