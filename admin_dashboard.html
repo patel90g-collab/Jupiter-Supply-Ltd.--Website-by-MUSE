@@ -88,8 +88,6 @@ async function doLogin(){
     setUser(j.user);renderNav();SECTIONS.dash();
   }catch(err){$('li_err').textContent='⚠️ '+err.message;}
 }
-  }catch(err){$('li_err').textContent='⚠️ '+err.message;}
-}
 function doLogout(){setToken(null);location.reload();}
 function setUser(u){const el=$('userbox');if(el)el.innerHTML=esc(u.full_name||u.email)+' <a href="#" onclick="changePw();return false" style="color:#9db2d8">password</a> · <a href="#" onclick="doLogout();return false" style="color:#9db2d8">logout</a>';}
 async function api(method,path,body){
