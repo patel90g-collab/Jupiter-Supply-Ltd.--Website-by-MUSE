@@ -90,6 +90,8 @@ class ProductIn(BaseModel):
     unit: str = "each"
     cost_price: float | None = None
     sell_price: float | None = None
+    quantity: float | None = 0
+    shipping: float | None = 0
     show_price: bool = False
     is_active: bool = True
 

@@ -41,6 +41,7 @@ tr:hover td{background:#fafcff}
 .fld input,.fld select,.fld textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit}
 .fld textarea{resize:vertical;min-height:64px}
 .frow{display:flex;gap:10px}.frow .fld{flex:1}
+.calcval{width:100%;padding:9px 10px;border:1px dashed var(--line);border-radius:8px;font-size:14px;font-weight:700;background:#f4f6fb;color:var(--navy)}
 .fact{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px}.chk input{width:auto}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 20px;border-radius:10px;font-size:14px;display:none;z-index:99;max-width:90vw}
@@ -121,6 +122,7 @@ function fldHTML(f,initial){
   if(f.t==='select'){inner='<select id="f_'+f.k+'">'+f.opts.map(o=>'<option value="'+esc(o.v)+'"'+(String(v)===String(o.v)?' selected':'')+'>'+esc(o.l)+'</option>').join('')+'</select>';}
   else if(f.t==='textarea'){inner='<textarea id="f_'+f.k+'">'+esc(v)+'</textarea>';}
   else if(f.t==='check'){return '<div class="fld"><label class="chk"><input type="checkbox" id="f_'+f.k+'"'+(v?' checked':'')+'> '+esc(f.label)+'</label></div>';}
+  else if(f.t==='calc'){return '<div class="fld"><label>'+esc(f.label)+'</label><div class="calcval" id="f_'+f.k+'">'+money(0)+'</div></div>';}
   else{inner='<input id="f_'+f.k+'" type="'+(f.t||'text')+'" value="'+esc(v)+'"'+(f.ph?' placeholder="'+esc(f.ph)+'"':'')+'>';}
   return '<div class="fld"><label>'+esc(f.label)+'</label>'+inner+'</div>';
 }
@@ -133,9 +135,24 @@ function openForm(title,fields,onSave,initial){
   });
   h+='<div class="fact"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="savebtn">Save</button></div>';
   $('formbox').innerHTML=h;$('modal').classList.add('open');
+  const hasCalc=fields.some(f=>f.t==='calc'||(f.t==='row'&&f.items.some(sf=>sf.t==='calc')));
+  if(hasCalc){
+    const recalc=()=>{
+      const q=Number(($('f_quantity')||{}).value)||0;
+      const p=Number(($('f_sell_price')||{}).value)||0;
+      const s=Number(($('f_shipping')||{}).value)||0;
+      const sub=q*p,tax=0.05*(sub+s),tot=sub+s+tax;
+      if($('f_subtotal'))$('f_subtotal').textContent=money(sub);
+      if($('f_tax'))$('f_tax').textContent=money(tax);
+      if($('f_total'))$('f_total').textContent=money(tot);
+    };
+    ['f_quantity','f_sell_price','f_shipping'].forEach(id=>{const el=$(id);if(el)el.addEventListener('input',recalc);});
+    recalc();
+  }
   $('savebtn').onclick=async()=>{
     const data={};
     fields.forEach(f=>{(f.t==='row'?f.items:[f]).forEach(sf=>{
+      if(sf.t==='calc')return;
       const el=$('f_'+sf.k);if(!el)return;
       if(sf.t==='check')data[sf.k]=el.checked;
       else if(el.value==='')data[sf.k]=null;
@@ -194,14 +211,17 @@ const PROD_F=()=>[
   {k:'description',label:'Description',t:'textarea'},
   {k:'category_id',label:'Category',t:'select',opts:[{v:'',l:'— none —'}].concat(CATS.map(c=>({v:c.id,l:c.name})))},
   {k:'supplier_id',label:'Supplier (internal)',t:'select',opts:[{v:'',l:'— none —'}].concat(SUPS.map(s=>({v:s.id,l:s.name})))},
-  {k:'unit',label:'Unit',t:'select',opts:['each','dozen','case','pack','box'].map(u=>({v:u,l:u}))},
-  {t:'row',items:[{k:'cost_price',label:'Cost (internal)',t:'number',num:1},{k:'sell_price',label:'Sell price',t:'number',num:1}]},
+  {k:'unit',label:'Unit of measure',t:'select',opts:['each','dozen','case','pack','box'].map(u=>({v:u,l:u}))},
+  {t:'row',items:[{k:'cost_price',label:'Cost (internal)',t:'number',num:1},{k:'sell_price',label:'Unit Price',t:'number',num:1,calc:1}]},
+  {t:'row',items:[{k:'quantity',label:'Qty',t:'number',num:1,calc:1},{k:'shipping',label:'Shipping',t:'number',num:1,calc:1}]},
+  {t:'row',items:[{k:'subtotal',label:'Subtotal (auto)',t:'calc'},{k:'tax',label:'Tax — GST 5% (auto)',t:'calc'}]},
+  {k:'total',label:'Total (auto)',t:'calc'},
   {k:'show_price',label:'Show price to customers',t:'check'},
 ];
 SECTIONS.products=async()=>{
   await refs();
-  await crudSection('📦 Products','/api/products',['SKU','Name','Category','Sell'],
-    r=>['<b>'+esc(r.sku)+'</b>',esc(r.name),esc((r.categories||{}).name||'—'),r.sell_price?money(r.sell_price):'<span class="tag">on quote</span>'],
+  await crudSection('📦 Products','/api/products',['SKU','Name','Category','Sell','Qty'],
+    r=>['<b>'+esc(r.sku)+'</b>',esc(r.name),esc((r.categories||{}).name||'—'),r.sell_price?money(r.sell_price):'<span class="tag">on quote</span>',(r.quantity==null||r.quantity==='')?'—':esc(r.quantity)],
     PROD_F(),PROD_F());
 };
 
