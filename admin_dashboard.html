@@ -109,6 +109,7 @@ const NAV=[
  {g:'Compliance'},{id:'compliance',t:'🏛 Compliance Desk'},
  {g:'Point of Sale'},{id:'pos',t:'🧾 POS Sale'},
  {g:'Intake'},{id:'intake',t:'📥 Email Intake'},
+ {g:'AI Tools'},{id:'aiintake',t:'🤖 AI Intake'},
  {g:'Voice'},{id:'voice',t:'📞 Call Log'},
 ];
 let cur='dash';
@@ -483,6 +484,112 @@ SECTIONS.intake=async()=>{
   window.openAdd=()=>toast('Intake leads come from email scan');
   window.openEdit=id=>openForm('Edit intake lead',[{k:'company_name',label:'Company *'},{k:'contact_name',label:'Contact'},{t:'row',items:[{k:'phone',label:'Phone'},{k:'email',label:'Email'}]},{k:'status',label:'Status',t:'select',opts:['new','contacted','qualified','converted','lost'].map(s=>({v:s,l:s}))},{k:'notes',label:'Notes',t:'textarea'}],async d=>{await api('PUT','/api/leads/'+id,d);},ROWS[id]);
 };
+/* ---- AI Intake: invoice / URL / photo -> products + bill ---- */
+let AI_INV=null,AI_PROD=null;
+async function aiPostFile(url,file,field){
+  const fd=new FormData();fd.append(field||'file',file);
+  const r=await fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+(token()||'')},body:fd});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.detail||('Failed ('+r.status+')'));
+  return j;
+}
+SECTIONS.aiintake=async()=>{
+  await refs();
+  window._catOpts=CATS.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join('');
+  $('main').innerHTML='<div class="hd"><h2>🤖 AI Intake</h2></div>'
+  +'<p class="note" style="margin-bottom:14px">Upload a vendor invoice, a product photo, or paste a product URL — AI reads it, you review, then one tap creates everything. Purchase price becomes cost, sell price = cost + <b>38% markup</b>, and the invoice becomes an AP bill.</p>'
+  +'<div class="tblwrap" style="padding:16px;margin-bottom:14px"><h3 style="margin-bottom:8px">📄 Vendor invoice → supplier + products + bill</h3>'
+  +'<p class="note" style="margin-bottom:10px">PDF or photo of a supplier invoice.</p>'
+  +'<div style="display:flex;gap:8px;margin-bottom:10px"><input type="file" id="ai_inv_file" accept=".pdf,.jpg,.jpeg,.png,.webp" style="flex:1"><button class="btn" onclick="aiAnalyzeInvoice()">Analyze with AI</button></div>'
+  +'<div id="ai_inv_out"></div></div>'
+  +'<div class="tblwrap" style="padding:16px;margin-bottom:14px"><h3 style="margin-bottom:8px">🌐 Product from website</h3>'
+  +'<p class="note" style="margin-bottom:10px">Paste a product page URL — AI pulls name, description and price.</p>'
+  +'<div style="display:flex;gap:8px;margin-bottom:10px"><input type="text" id="ai_url" placeholder="https://…" style="flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px"><button class="btn" onclick="aiAnalyzeUrl()">Fetch & analyze</button></div>'
+  +'<div id="ai_url_out"></div></div>'
+  +'<div class="tblwrap" style="padding:16px;margin-bottom:14px"><h3 style="margin-bottom:8px">📷 Product from photo</h3>'
+  +'<p class="note" style="margin-bottom:10px">Upload a product picture — AI identifies it and drafts the entry.</p>'
+  +'<div style="display:flex;gap:8px;margin-bottom:10px"><input type="file" id="ai_photo" accept="image/*" style="flex:1"><button class="btn" onclick="aiAnalyzePhoto()">Analyze photo</button></div>'
+  +'<div id="ai_photo_out"></div></div>';
+};
+async function aiAnalyzeInvoice(){
+  const f=$('ai_inv_file').files[0];
+  if(!f){toast('Choose an invoice file first');return;}
+  $('ai_inv_out').innerHTML='<p class="note">🤖 Reading invoice…</p>';
+  try{AI_INV=await aiPostFile('/api/intake/analyze-invoice',f,'file');renderInvPreview();}
+  catch(e){$('ai_inv_out').innerHTML='<p class="note">⚠️ '+esc(e.message)+'</p>';}
+}
+function renderInvPreview(){
+  const d=AI_INV,v=d.vendor||{};
+  let h='<div class="fld"><label>Vendor name *</label><input id="iv_name" value="'+esc(v.name||'')+'"></div>';
+  h+='<div class="frow"><div class="fld"><label>Email</label><input id="iv_email" value="'+esc(v.email||'')+'"></div><div class="fld"><label>Phone</label><input id="iv_phone" value="'+esc(v.phone||'')+'"></div></div>';
+  h+='<div class="fld"><label>Address</label><input id="iv_addr" value="'+esc(v.address||'')+'"></div>';
+  h+='<div class="frow"><div class="fld"><label>Invoice #</label><input id="iv_num" value="'+esc(d.invoice_number||'')+'"></div><div class="fld"><label>Date</label><input id="iv_date" value="'+esc(d.invoice_date||'')+'"></div><div class="fld"><label>Due</label><input id="iv_due" value="'+esc(d.due_date||'')+'"></div></div>';
+  h+='<table style="width:100%;font-size:13px;margin:10px 0"><tr><th style="text-align:left">Item</th><th>Qty</th><th>Unit</th><th>Cost</th><th>Sell +38%</th></tr>';
+  (d.line_items||[]).forEach(it=>{
+    const sell=((Number(it.unit_price)||0)*1.38).toFixed(2);
+    h+='<tr class="irow"><td><input class="d" value="'+esc(it.description||'')+'" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px"></td>'
+      +'<td><input class="q" type="number" step="any" value="'+esc(it.quantity==null?1:it.quantity)+'" style="width:64px;padding:6px;border:1px solid var(--line);border-radius:6px"></td>'
+      +'<td><input class="u" value="'+esc(it.unit||'each')+'" style="width:64px;padding:6px;border:1px solid var(--line);border-radius:6px"></td>'
+      +'<td><input class="p" type="number" step="0.01" value="'+esc(it.unit_price==null?0:it.unit_price)+'" style="width:84px;padding:6px;border:1px solid var(--line);border-radius:6px" oninput="aiUpdSell(this)"></td>'
+      +'<td class="s" style="font-weight:700">'+sell+'</td></tr>';
+  });
+  h+='</table><p class="note">Totals from the invoice — edit if needed:</p>';
+  h+='<div class="frow"><div class="fld"><label>Subtotal</label><input id="iv_sub" type="number" step="0.01" value="'+esc(d.subtotal||0)+'"></div><div class="fld"><label>Tax</label><input id="iv_tax" type="number" step="0.01" value="'+esc(d.tax||0)+'"></div><div class="fld"><label>Shipping</label><input id="iv_ship" type="number" step="0.01" value="'+esc(d.shipping||0)+'"></div><div class="fld"><label>Total</label><input id="iv_tot" type="number" step="0.01" value="'+esc(d.total||0)+'"></div></div>';
+  h+='<button class="btn" onclick="aiConfirmInvoice()">✅ Confirm & create supplier + products + bill</button> <span class="note">Nothing is saved until you confirm.</span>';
+  $('ai_inv_out').innerHTML=h;
+}
+function aiUpdSell(el){
+  const row=el.closest('tr');
+  row.querySelector('.s').textContent=((Number(el.value)||0)*1.38).toFixed(2);
+}
+async function aiConfirmInvoice(){
+  const items=[...document.querySelectorAll('#ai_inv_out .irow')].map(r=>({description:r.querySelector('.d').value,quantity:Number(r.querySelector('.q').value)||0,unit:r.querySelector('.u').value||'each',unit_price:Number(r.querySelector('.p').value)||0})).filter(i=>i.description);
+  if(!items.length){toast('Add at least one item');return;}
+  const body={vendor:{name:$('iv_name').value,email:$('iv_email').value,phone:$('iv_phone').value,address:$('iv_addr').value},invoice_number:$('iv_num').value,invoice_date:$('iv_date').value,due_date:$('iv_due').value,line_items:items,subtotal:Number($('iv_sub').value)||0,tax:Number($('iv_tax').value)||0,shipping:Number($('iv_ship').value)||0,total:Number($('iv_tot').value)||0,source_filename:AI_INV.source_filename};
+  try{
+    const r=await api('POST','/api/intake/confirm-invoice',body);
+    $('ai_inv_out').innerHTML='<p class="note">✅ Created: supplier <b>'+esc(r.supplier.name)+'</b> · '+r.products_created.length+' new product'+(r.products_created.length===1?'':'s')+(r.products_updated.length?' · '+r.products_updated.length+' updated':'')+' · bill <b>'+esc(r.bill.bill_number)+'</b> ('+money(r.bill.total)+', unpaid). Sell prices = cost + 38%.</p>';
+    toast('Invoice intake complete ✅');
+  }catch(e){toast('⚠️ '+e.message);}
+}
+async function aiAnalyzeUrl(){
+  const u=$('ai_url').value.trim();
+  if(!u){toast('Paste a product URL first');return;}
+  $('ai_url_out').innerHTML='<p class="note">🤖 Fetching page…</p>';
+  try{AI_PROD=await api('POST','/api/intake/analyze-url',{url:u});renderProdPreview('ai_url_out');}
+  catch(e){$('ai_url_out').innerHTML='<p class="note">⚠️ '+esc(e.message)+'</p>';}
+}
+async function aiAnalyzePhoto(){
+  const f=$('ai_photo').files[0];
+  if(!f){toast('Choose a photo first');return;}
+  $('ai_photo_out').innerHTML='<p class="note">🤖 Identifying product…</p>';
+  try{AI_PROD=await aiPostFile('/api/intake/analyze-photo',f,'image');renderProdPreview('ai_photo_out');}
+  catch(e){$('ai_photo_out').innerHTML='<p class="note">⚠️ '+esc(e.message)+'</p>';}
+}
+function renderProdPreview(outId){
+  ['ai_url_out','ai_photo_out'].forEach(id=>{if(id!==outId)$(id).innerHTML='';});
+  const d=AI_PROD,cost=Number(d.price)||0;
+  let h='<div class="fld"><label>Product name *</label><input id="ap_name" value="'+esc(d.name||'')+'"></div>';
+  h+='<div class="fld"><label>Description</label><textarea id="ap_desc">'+esc(d.description||'')+'</textarea></div>';
+  h+='<div class="frow"><div class="fld"><label>SKU (auto if blank)</label><input id="ap_sku" value="'+esc(d.sku||'')+'" placeholder="JS-AI-…"></div>'
+    +'<div class="fld"><label>Category</label><select id="ap_cat"><option value="">— none —</option>'+(window._catOpts||'')+'</select></div>'
+    +'<div class="fld"><label>Unit</label><select id="ap_unit">'+['each','dozen','case','pack','box'].map(u=>'<option'+(u===(d.suggested_unit||'each')?' selected':'')+'>'+u+'</option>').join('')+'</select></div></div>';
+  h+='<div class="frow"><div class="fld"><label>Cost price</label><input id="ap_cost" type="number" step="0.01" value="'+cost.toFixed(2)+'" oninput="aiUpdProdSell()"></div>'
+    +'<div class="fld"><label>Sell price (+38% auto)</label><input id="ap_sell" type="number" step="0.01" value="'+(cost*1.38).toFixed(2)+'"></div>'
+    +'<div class="fld"><label>Qty</label><input id="ap_qty" type="number" step="any" value="0"></div></div>';
+  h+='<div class="fld"><label>Supplier name (optional — created if new)</label><input id="ap_sup" value="'+esc(d.brand||'')+'"></div>';
+  h+='<button class="btn" onclick="aiConfirmProduct()">✅ Add product</button> <span class="note">Nothing is saved until you confirm.</span>';
+  $(outId).innerHTML=h;
+}
+function aiUpdProdSell(){$('ap_sell').value=((Number($('ap_cost').value)||0)*1.38).toFixed(2);}
+async function aiConfirmProduct(){
+  const body={name:$('ap_name').value,description:$('ap_desc').value,sku:$('ap_sku').value,category_id:$('ap_cat').value||null,supplier_name:$('ap_sup').value,unit:$('ap_unit').value,cost_price:Number($('ap_cost').value)||0,sell_price:Number($('ap_sell').value)||0,quantity:Number($('ap_qty').value)||0};
+  try{
+    const r=await api('POST','/api/intake/confirm-product',body);
+    ['ai_url_out','ai_photo_out'].forEach(id=>{$(id).innerHTML='';});
+    toast('✅ '+r.sku+' '+r.action+' — cost '+money(r.cost)+' → sell '+money(r.sell));
+  }catch(e){toast('⚠️ '+e.message);}
+}
 /* ---- Voice Call Log ---- */
 SECTIONS.voice=async()=>{
   const rows=await api('GET','/api/voice/calls');
