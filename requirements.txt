@@ -9,4 +9,4 @@ python-multipart>=0.0.9  # image upload parsing
 pydantic>=2.6.0
 pydantic-settings>=2.2.0
 python-dotenv>=1.0.0
-pymupdf>=1.23.0           # PDF invoice rendering for AI intake (no system deps)
+pypdf>=4.0.0               # pure-python PDF text extraction (serverless-safe, tiny)

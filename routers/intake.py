@@ -20,7 +20,6 @@ import re
 import string
 from datetime import date
 
-import fitz  # pymupdf
 import httpx
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from pydantic import BaseModel
@@ -203,18 +202,17 @@ class ProductConfirmIn(BaseModel):
 # ---------------------------------------------------------------------------
 # Invoice: analyze (read-only)
 # ---------------------------------------------------------------------------
-def _pdf_to_images(raw: bytes) -> list[str]:
-    """Render first 3 PDF pages to PNG data URLs for the vision model."""
-    doc = fitz.open(stream=raw, filetype="pdf")
-    urls = []
-    for page in doc[:3]:
-        pix = page.get_pixmap(dpi=150)
-        b64 = base64.b64encode(pix.tobytes("png")).decode("ascii")
-        urls.append(f"data:image/png;base64,{b64}")
-    doc.close()
-    if not urls:
-        raise HTTPException(400, "Could not read any page from this PDF")
-    return urls
+def _pdf_to_text(raw: bytes) -> str:
+    """Extract text from a PDF invoice (pure-python, serverless-safe)."""
+    from pypdf import PdfReader
+    reader = PdfReader(io.BytesIO(raw))
+    parts = []
+    for page in reader.pages[:5]:
+        try:
+            parts.append(page.extract_text() or "")
+        except Exception:
+            continue
+    return "\n".join(parts).strip()[:20000]
 
 
 @router.post("/analyze-invoice")
@@ -228,18 +226,15 @@ async def analyze_invoice(file: UploadFile = File(...)):
         if len(raw) > MAX_PDF_BYTES:
             raise HTTPException(413, "PDF too large — 15 MB max")
         try:
-            images = _pdf_to_images(raw)
-        except HTTPException:
-            raise
+            text_ctx = _pdf_to_text(raw)
         except Exception as exc:
             raise HTTPException(400, f"Could not read PDF: {exc}")
-        # Also grab any embedded text as extra context for the model.
-        try:
-            doc = fitz.open(stream=raw, filetype="pdf")
-            text_ctx = "\n".join(p.get_text() for p in doc[:3])[:6000]
-            doc.close()
-        except Exception:
-            text_ctx = ""
+        if len(text_ctx) < 200:
+            raise HTTPException(
+                400,
+                "This PDF looks like a scanned image with no readable text — "
+                "please upload it as a photo (JPG/PNG) instead")
+        images: list[str] = []
     else:
         if ctype not in ("image/jpeg", "image/png", "image/webp") \
                 and not fname.endswith((".jpg", ".jpeg", ".png", ".webp")):
@@ -251,12 +246,19 @@ async def analyze_invoice(file: UploadFile = File(...)):
         images = [f"data:{mime};base64,{b64}"]
         text_ctx = ""
 
-    user_text = (
-        "Extract every field from this vendor/supplier invoice and return ONLY "
-        "valid JSON matching this schema (use empty strings / 0 where unknown):\n"
-        + INVOICE_SCHEMA_HINT
-        + ("\n\nEmbedded PDF text for reference:\n" + text_ctx if text_ctx else "")
-    )
+    if text_ctx:
+        user_text = (
+            "Extract every field from this vendor/supplier invoice TEXT and return ONLY "
+            "valid JSON matching this schema (use empty strings / 0 where unknown):\n"
+            + INVOICE_SCHEMA_HINT
+            + "\n\nInvoice text:\n" + text_ctx
+        )
+    else:
+        user_text = (
+            "Extract every field from this vendor/supplier invoice photo and return ONLY "
+            "valid JSON matching this schema (use empty strings / 0 where unknown):\n"
+            + INVOICE_SCHEMA_HINT
+        )
     content: list[dict] = [{"type": "text", "text": user_text}]
     for img in images:
         content.append({"type": "image_url", "image_url": {"url": img}})
