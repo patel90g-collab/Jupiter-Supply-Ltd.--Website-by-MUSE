@@ -24,6 +24,7 @@ from routers.pos import router as pos_router
 from routers.auth import router as auth_router
 from routers.voice import router as voice_router
 from routers.intake import router as intake_router
+from routers.shop import router as shop_router
 
 app = FastAPI(
     title="Jupiter Supply — AI Product Search Engine",
@@ -72,6 +73,7 @@ app.include_router(pos_router)
 app.include_router(auth_router)
 app.include_router(voice_router)
 app.include_router(intake_router)
+app.include_router(shop_router)
 
 
 @app.get("/health")
@@ -115,7 +117,7 @@ pre{background:#0a1528;border-radius:10px;padding:12px;font-size:12px;overflow:a
 .idbox{background:rgba(212,160,23,.12);border:1px solid #D4A017;border-radius:10px;padding:10px;margin-bottom:8px;font-size:13px}
 </style></head><body><div class="wrap">
 <div class="badge">PRIVATE PREVIEW — NOT THE WEBSITE</div>
-<div style="text-align:right;margin-bottom:6px"><a href="/admin" style="display:inline-block;background:#D4A017;color:#0a1528;font-weight:700;font-size:14px;padding:10px 18px;border-radius:10px;text-decoration:none">🔐 Admin Sign In</a></div>
+<div style="text-align:right;margin-bottom:6px"><a href="/shop" style="display:inline-block;background:transparent;border:2px solid #D4A017;color:#D4A017;font-weight:700;font-size:14px;padding:8px 16px;border-radius:10px;text-decoration:none;margin-right:8px">🛍️ Shop Catalog</a><a href="/admin" style="display:inline-block;background:#D4A017;color:#0a1528;font-weight:700;font-size:14px;padding:10px 18px;border-radius:10px;text-decoration:none">🔐 Admin Sign In</a></div>
 <h1>🔍 Jupiter AI Search Engine</h1>
 <p class="sub">Try the three search features below. This is the backend preview — your website (jupitersupply.ca) is untouched.</p>
 <div class="card"><h2>1️⃣ Keyword search</h2><p>Type a product name, SKU or model number. Searches your catalog.</p>
