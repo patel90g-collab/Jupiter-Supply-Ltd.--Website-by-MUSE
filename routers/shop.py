@@ -174,7 +174,7 @@ def _fetch_all_category_ids(supabase: Client) -> list:
     offset = 0
     while True:
         rows = supabase.table("products_public").select("category_id") \
-            .eq("is_active", True).range(offset, offset + 999).execute().data or []
+            .eq("is_active", True).offset(offset).limit(1000).execute().data or []
         ids.extend(r["category_id"] for r in rows if r.get("category_id"))
         if len(rows) < 1000:
             break
@@ -190,12 +190,11 @@ def _fetch_page(build_query, page: int):
     build_query(cols) must return a query object ready for .range().execute().
     """
     start = (page - 1) * PAGE_SIZE
-    end = start + PAGE_SIZE  # one extra row to detect a next page
     try:
-        res = build_query(COLS_WITH_IMG).range(start, end).execute()
+        res = build_query(COLS_WITH_IMG).offset(start).limit(PAGE_SIZE + 1).execute()
         rows = res.data or []
     except Exception:
-        res = build_query(COLS_BASE).range(start, end).execute()
+        res = build_query(COLS_BASE).offset(start).limit(PAGE_SIZE + 1).execute()
         rows = res.data or []
     has_next = len(rows) > PAGE_SIZE
     return rows[:PAGE_SIZE], has_next
