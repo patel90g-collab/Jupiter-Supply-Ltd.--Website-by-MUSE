@@ -3,10 +3,7 @@ Jupiter Supply Ltd. — Live storefront (public, no login).
 
 Reads the products_public VIEW + categories on every request, so anything
 added in the admin (dashboard Products form or AI Intake) appears here
-automatically, grouped by category. NOTE: preview deployments need
-SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY in the Preview env scope
-(Vercel project settings) or every shop route returns 500.
-Prices show ONLY for products with
+automatically, grouped by category. Prices show ONLY for products with
 show_price=true (the view returns NULL otherwise) — supplier, cost and
 margin data never leave the database.
 
@@ -145,8 +142,11 @@ def _card_html(p: dict) -> str:
             f"<a class=\"btn\" href=\"{wa}\">Order on WhatsApp</a></div>")
 
 
-def _pager_html(base: str, page: int, total_pages: int) -> str:
-    if total_pages <= 1:
+def _pager_html(base: str, page: int, has_next: bool) -> str:
+    """Prev/Next pager. has_next is detected by fetching one extra row,
+    so no exact-count query is needed (count queries proved unreliable
+    on the products_public view)."""
+    if page <= 1 and not has_next:
         return ""
     sep = "&" if "?" in base else "?"
     parts = ['<div class="pager">']
@@ -154,8 +154,8 @@ def _pager_html(base: str, page: int, total_pages: int) -> str:
         parts.append(f'<a href="{base}{sep}page={page - 1}">← Prev</a>')
     else:
         parts.append('<span class="dis">← Prev</span>')
-    parts.append(f'<span class="cur">Page {page} of {total_pages}</span>')
-    if page < total_pages:
+    parts.append(f'<span class="cur">Page {page}</span>')
+    if has_next:
         parts.append(f'<a href="{base}{sep}page={page + 1}">Next →</a>')
     else:
         parts.append('<span class="dis">Next →</span>')
@@ -184,28 +184,21 @@ def _fetch_all_category_ids(supabase: Client) -> list:
 
 def _fetch_page(build_query, page: int):
     """Fetch one page via build_query(cols). Tries WITH image_url first,
-    falls back to WITHOUT it when the view lacks that column. Returns rows.
+    falls back to WITHOUT it when the view lacks that column.
+    Returns (display_rows, has_next). has_next is detected by fetching
+    one extra row beyond the page size — no count query needed.
     build_query(cols) must return a query object ready for .range().execute().
     """
     start = (page - 1) * PAGE_SIZE
-    end = start + PAGE_SIZE - 1
+    end = start + PAGE_SIZE  # one extra row to detect a next page
     try:
         res = build_query(COLS_WITH_IMG).range(start, end).execute()
-        return res.data or []
+        rows = res.data or []
     except Exception:
         res = build_query(COLS_BASE).range(start, end).execute()
-        return res.data or []
-
-
-def _count_exact(build_query) -> int:
-    """Exact row count for build_query(cols). Returns 0 on any failure."""
-    try:
-        res = build_query("id", count="exact").limit(1).execute()
-        if getattr(res, "count", None) is not None:
-            return int(res.count)
-    except Exception:
-        pass
-    return 0
+        rows = res.data or []
+    has_next = len(rows) > PAGE_SIZE
+    return rows[:PAGE_SIZE], has_next
 
 
 @router.get("/shop", include_in_schema=False)
@@ -257,11 +250,7 @@ def shop_search(q: str = Query(""), page: int = Query(1, ge=1),
             .eq("is_active", True).order("name")
         return query
 
-    rows = _fetch_page(lambda cols: build(cols), page)
-    total = _count_exact(lambda cols, count=None: build(cols, count=count))
-    if not total:
-        total = len(rows)
-    total_pages = max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE)
+    rows, has_next = _fetch_page(lambda cols: build(cols), page)
     if not rows:
         cards = (f"<p class=\"sub\">No products found for “{_esc(q)}” — "
                  f"try a different SKU or product name.</p>")
@@ -269,11 +258,11 @@ def shop_search(q: str = Query(""), page: int = Query(1, ge=1),
         cards = "".join(_card_html(p) for p in rows)
     body = (f"<a class=\"back\" href=\"/shop\">← All categories</a>"
             f"<h1>Search results</h1>"
-            f"<p class=\"sub\">{total} result{'s' if total != 1 else ''} for “{_esc(q)}”</p>"
+            f"<p class=\"sub\">Results for “{_esc(q)}” (page {page})</p>"
             + _search_box(q)
             + _tabs(cats, None)
             + f"<div class=\"grid\">{cards}</div>"
-            + _pager_html(f"/shop/search?q={quote(q)}", page, total_pages))
+            + _pager_html(f"/shop/search?q={quote(q)}", page, has_next))
     return _page("Search", body)
 
 
@@ -294,11 +283,7 @@ def shop_category(slug: str, page: int = Query(1, ge=1),
         return supabase.table("products_public").select(cols, count=count) \
             .eq("category_id", cat["id"]).eq("is_active", True).order("name")
 
-    rows = _fetch_page(lambda cols: build(cols), page)
-    total = _count_exact(lambda cols, count=None: build(cols, count=count))
-    if not total:
-        total = len(rows)
-    total_pages = max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE)
+    rows, has_next = _fetch_page(lambda cols: build(cols), page)
     if not rows:
         cards = ("<p class=\"sub\">No products in this category yet — "
                  "check back soon, new arrivals are added regularly.</p>")
@@ -306,9 +291,8 @@ def shop_category(slug: str, page: int = Query(1, ge=1),
         cards = "".join(_card_html(p) for p in rows)
     body = (f"<a class=\"back\" href=\"/shop\">← All categories</a>"
             f"<h1>{_esc(cat['name'])}</h1>"
-            f"<p class=\"sub\">{total} product{'s' if total != 1 else ''}</p>"
             + _search_box()
             + _tabs(cats, slug)
             + f"<div class=\"grid\">{cards}</div>"
-            + _pager_html(f"/shop/{_esc(slug)}", page, total_pages))
+            + _pager_html(f"/shop/{_esc(slug)}", page, has_next))
     return _page(cat["name"], body)
