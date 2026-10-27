@@ -3,7 +3,10 @@ Jupiter Supply Ltd. — Live storefront (public, no login).
 
 Reads the products_public VIEW + categories on every request, so anything
 added in the admin (dashboard Products form or AI Intake) appears here
-automatically, grouped by category. Prices show ONLY for products with
+automatically, grouped by category. NOTE: preview deployments need
+SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY in the Preview env scope
+(Vercel project settings) or every shop route returns 500.
+Prices show ONLY for products with
 show_price=true (the view returns NULL otherwise) — supplier, cost and
 margin data never leave the database.
 
