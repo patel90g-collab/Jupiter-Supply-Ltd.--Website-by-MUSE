@@ -67,12 +67,33 @@ def _page(title: str, body: str) -> HTMLResponse:
     return HTMLResponse(html)
 
 
+def _all_active_products(supabase, fields: str, category_id: str | None = None):
+    """Fetch ALL active products from products_public, paginated.
+
+    A single fetch caps at 1000 rows, which silently under-counted
+    categories once the catalog passed ~2000 products. Pagination keeps
+    the shop counts and listings accurate at any catalog size.
+    """
+    rows: list = []
+    start = 0
+    while True:
+        q = supabase.table("products_public").select(fields) \
+            .eq("is_active", True).order("name")
+        if category_id:
+            q = q.eq("category_id", category_id)
+        batch = q.range(start, start + 999).execute().data or []
+        rows.extend(batch)
+        if len(batch) < 1000:
+            break
+        start += 1000
+    return rows
+
+
 @router.get("/shop", include_in_schema=False)
 def shop_home(supabase: Client = Depends(get_supabase)):
     cats = supabase.table("categories").select("id,name,slug") \
         .order("sort_order").execute().data or []
-    prods = supabase.table("products_public").select("category_id") \
-        .eq("is_active", True).limit(2000).execute().data or []
+    prods = _all_active_products(supabase, "category_id")
     counts: dict[str, int] = {}
     for p in prods:
         counts[p["category_id"]] = counts.get(p["category_id"], 0) + 1
@@ -100,10 +121,9 @@ def shop_category(slug: str, supabase: Client = Depends(get_supabase)):
                      "<h1>Category not found</h1>"
                      "<p class=\"sub\">That category does not exist.</p>")
     cat = cats[0]
-    prods = supabase.table("products_public") \
-        .select("sku,name,description,unit,sell_price,show_price") \
-        .eq("category_id", cat["id"]).eq("is_active", True) \
-        .order("name").limit(500).execute().data or []
+    prods = _all_active_products(
+        supabase, "sku,name,description,unit,sell_price,show_price",
+        category_id=cat["id"])
     if not prods:
         cards = ("<p class=\"sub\">No products in this category yet — "
                  "check back soon, new arrivals are added regularly.</p>")
