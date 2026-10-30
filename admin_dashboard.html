@@ -90,7 +90,7 @@ async function doLogin(){
   }catch(err){$('li_err').textContent='⚠️ '+err.message;}
 }
 function doLogout(){setToken(null);location.reload();}
-function setUser(u){const el=$('userbox');if(el)el.innerHTML=esc(u.full_name||u.email)+' <a href="#" onclick="changePw();return false" style="color:#9db2d8">password</a> · <a href="#" onclick="doLogout();return false" style="color:#9db2d8">logout</a>';}
+function setUser(u){const el=$('userbox');if(el)el.innerHTML=esc(u.full_name||u.email)+' <a href="/shop" target="_blank" style="color:#D4A017">🛍️ View Shop</a> · <a href="#" onclick="changePw();return false" style="color:#9db2d8">password</a> · <a href="#" onclick="doLogout();return false" style="color:#9db2d8">logout</a>';}
 async function api(method,path,body){
   const r=await fetch(path,{method,headers:{'Content-Type':'application/json','Authorization':'Bearer '+(token()||'')},body:body?JSON.stringify(body):undefined});
   if(r.status===401){setToken(null);$('loginModal').classList.add('open');throw new Error('Session expired — please sign in');}

@@ -37,7 +37,14 @@ h1{font-size:26px;margin:14px 0 4px}
 .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff}
 .foot{margin-top:26px;color:#9db2d8;font-size:12px;text-align:center;line-height:1.7}
 .back{display:inline-block;margin-bottom:12px}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+.nav a{display:inline-block;padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff}
+.nav a.gold{background:#D4A017;border-color:#D4A017;color:#0f1f3d}
 """
+
+WEBSITE_URL = "https://muse.ai/s/jupiter-supply-ltd-website-pxo6xcxkrxxlnxub/QXk0S4CP_rZIbEYK0mt-_-3qyw6XHEzp4AGvqQZrSwY"
+
+NAV = """<div class="nav"><a href="/">🏠 Home</a><a href="/shop" class="gold">🛍️ Shop</a><a href="/admin">🔐 Admin</a><a href="WEBSITE_URL_PLACEHOLDER">🌐 Website</a></div>""".replace("WEBSITE_URL_PLACEHOLDER", WEBSITE_URL)
 
 FOOT = """<div class="foot">Jupiter Supply Ltd. · Supplying Quality. Delivering Trust.<br>
 <a href="mailto:sales@jupitersupply.ca">sales@jupitersupply.ca</a> · Cell 587.778.1702 · Office 587.778.3633<br>
@@ -55,6 +62,7 @@ def _page(title: str, body: str) -> HTMLResponse:
             f"<style>{CSS}</style></head><body><div class=\"wrap\">"
             "<div class=\"top\"><div class=\"logo\">🪐 JUPITER <span>SUPPLY</span></div>"
             "<span class=\"badge\">LIVE CATALOG</span></div>"
+            + NAV
             + body + FOOT + "</div></body></html>")
     return HTMLResponse(html)
 
